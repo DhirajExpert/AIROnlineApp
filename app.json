@@ -1,0 +1,39 @@
+{
+  "expo": {
+    "name": "AIROnline App",
+    "slug": "AirOnline",
+    "version": "0.0.1",
+    "orientation": "portrait",
+    "icon": "./assets/app.png",
+    "userInterfaceStyle": "light",
+    "splash": {
+      "image": "./assets/splash.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#ffffff"
+    },
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.aironline.app"
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/app.png",
+        "backgroundColor": "#ffffff"
+      }
+    },
+    "web": {
+      "favicon": "./assets/app.png"
+    },
+    "platforms": [
+      "ios",
+      "android"
+    ],
+    "devClient": true,
+    "entryPoint": "./App.js",
+    "extra": {
+      "eas": {
+        "projectId": "e55420d3-7072-4dd2-b2eb-6c7eb60c22cd"
+      }
+    }
+  }
+}
