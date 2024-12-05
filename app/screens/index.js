@@ -25,3 +25,6 @@ export {default as JudgementDateDetails} from "./BrowseByLawyerDetails";
 export {default as BenchStrengthDetails} from "./BenchStrengthDetails";
 export {default as Dashboard} from "./Dashboard";
 export {default as FreeTextSearchDetails} from "./FreeTextSearchDetails";
+export {default as TopicalSearch} from "./TopicalSearch";
+export {default as TopicalSearchDetails} from "./TopicalSearchDetails";
+export {default as Test} from "./Test";

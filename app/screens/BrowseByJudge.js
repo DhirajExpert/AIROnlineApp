@@ -38,12 +38,10 @@ const styles = StyleSheet.create({
     safearea:{
         flex:1,
         paddingHorizontal:20
-
     },
     container:{
         flex:1,
         justifyContent:"flex-start",
         flexDirection:"column"
-
     }
 });

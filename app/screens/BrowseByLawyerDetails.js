@@ -163,10 +163,11 @@ const fetchData = async () => {
                                     }}
                                 />
                                 
-                                <Text style={styles.headingText}>for Respondant: </Text>
+                                <Text style={styles.Respondant}>for Respondant: </Text>
                                 <Text style={styles.bodyText}>{item.advocate_app}</Text>
-                                <Text style={styles.headingText}>for Petitioner: </Text>
+                                <Text style={styles.Petitioner}>for Petitioner: </Text>
                                 <Text style={styles.bodyText}>{item.advocate_res}</Text>
+
                                 <View
                                     style={{
                                         borderBottomColor: 'black',
@@ -244,10 +245,16 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         alignItems: 'center',
     },
-    headingText: {
+    Respondant: {
         fontWeight: 'bold',
         fontSize: 16,
     },
+    Petitioner: {
+        fontWeight: 'bold',
+        fontSize: 16,
+        marginTop:5
+    },
+    
     bodyText: {
         fontSize: 15,
     },

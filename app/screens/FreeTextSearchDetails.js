@@ -2,7 +2,15 @@ import React, { useEffect, useState, useRef } from "react";
 import { FlatList, StyleSheet, Text, View, TouchableOpacity, ActivityIndicator, Pressable } from "react-native";
 import { getFTSDigestView } from "../api/api";
 import { SafeAreaView } from "react-native-safe-area-context";
-import globalStyle from "../core/Style"
+import globalStyle from "../core/Style";
+import {
+    useFonts, Signika_300Light,
+    Signika_400Regular,
+    Signika_500Medium,
+    Signika_600SemiBold,
+    Signika_700Bold,
+} from '@expo-google-fonts/signika';
+
 export default function FreeTextSearchDetails({ route, navigation }) {
     const { searchword } = route.params;
     const [responseDigestView, setResponseDigestView] = useState([]);
@@ -15,9 +23,13 @@ export default function FreeTextSearchDetails({ route, navigation }) {
     const viewabilityConfig = useRef({ viewAreaCoveragePercentThreshold: 90 }).current; // To determine if an item is fully visible
     const [data, setData] = useState([]);
     const onEndReachedCalledDuringMomentum = useRef(false);
+
+
     useEffect(() => {
         CourtDigestView();
     }, []);
+
+
 
     const CourtDigestView = async () => {
 
@@ -68,22 +80,26 @@ export default function FreeTextSearchDetails({ route, navigation }) {
             onEndReachedCalledDuringMomentum.current = true;
         }
     };
-
-
     const onMomentumScrollEnd = () => {
         onEndReachedCalledDuringMomentum.current = false;
     };
+
     const renderShortNote = ({ item, index, citationID }) => {
         const isExpanded = expandedNotes[`${citationID}-${index}`];
         const lnoteText = isExpanded ? item.lnote : item.lnote.substring(0, 100) + '...';
-
         return (
-            <View style={styles.noteContainer}>
-                <Text style={styles.noteText}>{item.snote}</Text>
-                {isExpanded && <Text style={styles.noteLText}>{item.lnote}</Text>}
+            <View style={globalStyle.noteContainer}>
+
+                {/* <Text style={globalStyle.noteText}>{item.snote}</Text> */}
+                {highlightText(item.snote, searchword)}
+                {isExpanded &&
+                    // <Text style={globalStyle.noteLText}>{item.lnote}</Text>
+                    highlightText(item.lnote, searchword)
+                }
+
                 {item.lnote && (
                     <TouchableOpacity onPress={() => toggleExpansion(citationID, index)}>
-                        <Text style={styles.showMoreText}>
+                        <Text style={globalStyle.showMoreText}>
                             {isExpanded ? 'Show Less' : 'Show More'}
                         </Text>
                     </TouchableOpacity>
@@ -100,6 +116,30 @@ export default function FreeTextSearchDetails({ route, navigation }) {
         }
         )
     }
+    const escapeRegExp = (string) => string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+
+    const highlightText = (text, searchText) => {
+        const safeText = String(text);
+        if (!searchText) return <Text>{safeText}</Text>;
+
+        const escapedSearchText = escapeRegExp(searchText);
+        const regex = new RegExp(`(${escapedSearchText})`, 'gi');
+        const parts = safeText.split(regex);
+
+        return (
+            <Text>
+                {parts.map((part, index) =>
+                    regex.test(part) ? (
+                        <Text key={index} style={{ backgroundColor: 'yellow' }}>
+                            {part}
+                        </Text>
+                    ) : (
+                        <Text key={index} style={globalStyle.noteText}>{part}</Text>
+                    )
+                )}
+            </Text>
+        );
+    };
     return (
         <SafeAreaView edges={['left', 'right', 'bottom']} style={globalStyle.safearea}>
             <View style={styles.container}>
@@ -111,11 +151,11 @@ export default function FreeTextSearchDetails({ route, navigation }) {
                             <Pressable onPress={() => CitationClick(item.citationName, item.citationID)}>
                                 <Text style={styles.title} >{item.citationName}</Text>
                             </Pressable>
-                            <Text style={styles.subtitle}>{item.courts}</Text>
-                            <Text style={styles.subtitle}>HON'BLE JUDGE(S): {item.judgeName}</Text>
-                            <Text style={styles.subtitle}>{item.nominal}</Text>
+                            <Text style={globalStyle.courts}>{item.courts}</Text>
+                            <Text style={globalStyle.judgeName}>HON'BLE JUDGE(S): {item.judgeName}</Text>
+                            <Text style={globalStyle.nominal}>{item.nominal}</Text>
                             {/* <Text style={styles.detail}>{item.topic}</Text> */}
-                            <Text style={styles.detail}>{item.combineDod}</Text>
+                            <Text style={globalStyle.combineDod}>{item.combineDod}</Text>
                             <FlatList
                                 data={item.shortNote}
                                 renderItem={({ item, index }) => renderShortNote({ item, index, citationID: item.citationID })}
@@ -126,6 +166,7 @@ export default function FreeTextSearchDetails({ route, navigation }) {
                                 ListFooterComponent={
                                     loading ? <ActivityIndicator size="large" color="#0000ff" /> : null
                                 }
+
                             />
                         </View>)
                     }
@@ -136,12 +177,7 @@ export default function FreeTextSearchDetails({ route, navigation }) {
     );
 }
 const styles = StyleSheet.create({
-    // container: {
-    //     flex: 1,
-    //     justifyContent: "flex-start",
-    //     flexDirection: "column"
 
-    // },
     item: {
         backgroundColor: '#d9dedb',
         padding: 15,
@@ -155,20 +191,33 @@ const styles = StyleSheet.create({
         fontWeight: 'bold',
         color: 'blue'
     },
-    subtitle: {
-        fontSize: 16,
-        color: '#555',
+
+    highlight: {
+        backgroundColor: 'yellow',
+        color: 'black',
     },
-    noteContainer: {
-        padding: 5,
-        backgroundColor: '#eef',
-        marginTop: 8,
-        borderRadius: 4
+
+    judges: {
+        fontFamily: 'Signika_600SemiBold'
+    },
+    courts: {
+        fontSize: 16,
+        color: '#000',
+        fontWeight: 'bold'
+    },
+    nominal: {
+        fontSize: 16,
+        color: '#000',
+    },
+    combineDod: {
+        fontSize: 13,
+        color: '#787775',
     },
     noteLText: {
         fontSize: 14,
         color: '#333',
-        textAlign: 'justify'
+        textAlign: 'justify',
+        fontFamily: 'Signika_300Light'
     },
     showMoreText: {
         fontSize: 14,
@@ -182,14 +231,15 @@ const styles = StyleSheet.create({
         color: '#333',
         fontWeight: 'bold',
         textAlign: 'justify',
+        fontFamily: 'Signika_600SemiBold'
 
     },
-    itemContainer: {
-        backgroundColor: '#f8f8f8',
-        padding: 15,
-        marginVertical: 8,
-        borderRadius: 8,
-        borderColor: '#ddd',
-        borderWidth: 1
+    noteContainer: {
+        padding: 5,
+        backgroundColor: '#eef',
+        marginTop: 8,
+        borderRadius: 4
     },
+
+
 });

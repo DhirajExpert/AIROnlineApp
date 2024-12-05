@@ -1,11 +1,18 @@
 import React, { useEffect, useState, useRef } from "react";
 import { FlatList, StyleSheet, Text, View, TouchableOpacity, ActivityIndicator, Pressable } from "react-native";
-import { getBenchStrengthDetails } from "../api/api";
+import { getTopicalDigestView } from "../api/api";
 import { SafeAreaView } from "react-native-safe-area-context";
 import globalStyle from "../core/Style";
+import {
+    useFonts, Signika_300Light,
+    Signika_400Regular,
+    Signika_500Medium,
+    Signika_600SemiBold,
+    Signika_700Bold,
+} from '@expo-google-fonts/signika';
 
-export default function BenchStrengthDetails({ route, navigation }) {
-    const { benchStrength } = route.params;
+export default function TopicalSearchDetails({ route, navigation }) {
+    const { searchword } = route.params;
     const [responseDigestView, setResponseDigestView] = useState([]);
     const [expandedNotes, setExpandedNotes] = useState({});
 
@@ -16,17 +23,22 @@ export default function BenchStrengthDetails({ route, navigation }) {
     const viewabilityConfig = useRef({ viewAreaCoveragePercentThreshold: 90 }).current; // To determine if an item is fully visible
     const [data, setData] = useState([]);
     const onEndReachedCalledDuringMomentum = useRef(false);
+
+
     useEffect(() => {
         CourtDigestView();
     }, []);
+
+
+
     const CourtDigestView = async () => {
 
         if (loading || !hasMore) return;
 
         setLoading(true);
         try {
-            const response = await getBenchStrengthDetails(benchStrength, 10, `${offset}`);
-            console.log("getBenchStrengthDetails", response);
+            const response = await getTopicalDigestView(searchword, 10, `${offset}`);
+            console.log("getFTSDigestView", response);
 
             if (response.err_code === 'success') {
                 console.log("count", response.docCount);
@@ -34,7 +46,7 @@ export default function BenchStrengthDetails({ route, navigation }) {
                 if (response.docCount > 0) {
                     setResponseDigestView((prevData) => [...prevData, ...response.digestView]);
                     setData((prevData) => [...prevData, ...(response.digestView)]);
-                    setOffset((prevOffset) => prevOffset + 10);
+                    setOffset((prevOffset) => prevOffset + 10); // Increase offset by 10
 
                     if (response.docCount < 10) {
                         setHasMore(false);
@@ -68,19 +80,23 @@ export default function BenchStrengthDetails({ route, navigation }) {
             onEndReachedCalledDuringMomentum.current = true;
         }
     };
-
-
     const onMomentumScrollEnd = () => {
         onEndReachedCalledDuringMomentum.current = false;
     };
+
     const renderShortNote = ({ item, index, citationID }) => {
         const isExpanded = expandedNotes[`${citationID}-${index}`];
         const lnoteText = isExpanded ? item.lnote : item.lnote.substring(0, 100) + '...';
-
         return (
             <View style={globalStyle.noteContainer}>
-                <Text style={globalStyle.noteText}>{item.snote}</Text>
-                {isExpanded && <Text style={globalStyle.noteLText}>{item.lnote}</Text>}
+
+                {/* <Text style={globalStyle.noteText}>{item.snote}</Text> */}
+                {highlightText(item.snote, searchword)}
+                {isExpanded && 
+                // <Text style={globalStyle.noteLText}>{item.lnote}</Text>
+                highlightText(item.lnote, searchword)
+                }
+                
                 {item.lnote && (
                     <TouchableOpacity onPress={() => toggleExpansion(citationID, index)}>
                         <Text style={globalStyle.showMoreText}>
@@ -100,7 +116,30 @@ export default function BenchStrengthDetails({ route, navigation }) {
         }
         )
     }
+    const escapeRegExp = (string) => string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 
+    const highlightText = (text, searchText) => {
+        const safeText = String(text);
+        if (!searchText) return <Text>{safeText}</Text>;
+
+        const escapedSearchText = escapeRegExp(searchText);
+        const regex = new RegExp(`(${escapedSearchText})`, 'gi');
+        const parts = safeText.split(regex);
+
+        return (
+            <Text>
+                {parts.map((part, index) =>
+                    regex.test(part) ? (
+                        <Text key={index} style={{backgroundColor:'yellow'}}>
+                            {part}
+                        </Text>
+                    ) : (
+                        <Text key={index} style={globalStyle.noteText}>{part}</Text>
+                    )
+                )}
+            </Text>
+        );
+    };
     return (
         <SafeAreaView edges={['left', 'right', 'bottom']} style={globalStyle.safearea}>
             <View style={styles.container}>
@@ -112,10 +151,10 @@ export default function BenchStrengthDetails({ route, navigation }) {
                             <Pressable onPress={() => CitationClick(item.citationName, item.citationID)}>
                                 <Text style={styles.title} >{item.citationName}</Text>
                             </Pressable>
-
                             <Text style={globalStyle.courts}>{item.courts}</Text>
-                            <Text style={globalStyle.judges}>HON'BLE JUDGE(S): {item.judgeName}</Text>
+                            <Text style={globalStyle.judgeName}>HON'BLE JUDGE(S): {item.judgeName}</Text>
                             <Text style={globalStyle.nominal}>{item.nominal}</Text>
+                            {/* <Text style={styles.detail}>{item.topic}</Text> */}
                             <Text style={globalStyle.combineDod}>{item.combineDod}</Text>
                             <FlatList
                                 data={item.shortNote}
@@ -127,44 +166,18 @@ export default function BenchStrengthDetails({ route, navigation }) {
                                 ListFooterComponent={
                                     loading ? <ActivityIndicator size="large" color="#0000ff" /> : null
                                 }
+
                             />
-                            {/* <Text style={styles.advocateHeadingText}>Name of Advocates</Text>
-                            <View >
-                                <View
-                                    style={{
-                                        borderBottomColor: 'black',
-                                        borderBottomWidth: 3,
-                                    }}
-                                />
-
-                                <Text style={styles.headingText}>for Respondant: </Text>
-                                <Text style={styles.bodyText}>{item.advocate_app}</Text>
-                                <Text style={styles.headingText}>for Petitioner: </Text>
-                                <Text style={styles.bodyText}>{item.advocate_res}</Text>
-                                <View
-                                    style={{
-                                        borderBottomColor: 'black',
-                                        borderBottomWidth: 3,
-                                    }}
-                                />
-                            </View> */}
-
                         </View>)
                     }
                     keyExtractor={item => item.citationID}
                 />
             </View>
         </SafeAreaView>
-
     );
 }
 const styles = StyleSheet.create({
-    // container: {
-    //     flex: 1,
-    //     justifyContent: "flex-start",
-    //     flexDirection: "column"
 
-    // },
     item: {
         backgroundColor: '#d9dedb',
         padding: 15,
@@ -179,17 +192,54 @@ const styles = StyleSheet.create({
         color: 'blue'
     },
 
-    headingText: {
-        fontWeight: 'bold',
+    highlight: {
+        backgroundColor: 'yellow',
+        color: 'black',
+    },
+
+    judges: {
+        fontFamily: 'Signika_600SemiBold'
+    },
+    courts: {
         fontSize: 16,
+        color: '#000',
+        fontWeight: 'bold'
     },
-    bodyText: {
-        fontSize: 15,
-    },
-    advocateHeadingText: {
-        fontWeight: 'bold',
+    nominal: {
         fontSize: 16,
-        marginVertical: 10
+        color: '#000',
     },
+    combineDod: {
+        fontSize: 13,
+        color: '#787775',
+    },
+    noteLText: {
+        fontSize: 14,
+        color: '#333',
+        textAlign: 'justify',
+        fontFamily: 'Signika_300Light'
+    },
+    showMoreText: {
+        fontSize: 14,
+        color: 'blue',
+        marginTop: 4,
+        fontWeight: 'bold'
+    },
+    noteText: {
+        marginTop: 5,
+        fontSize: 14,
+        color: '#333',
+        fontWeight: 'bold',
+        textAlign: 'justify',
+        fontFamily: 'Signika_600SemiBold'
+
+    },
+    noteContainer: {
+        padding: 5,
+        backgroundColor: '#eef',
+        marginTop: 8,
+        borderRadius: 4
+    },
+
 
 });
