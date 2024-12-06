@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { TouchableOpacity, StyleSheet, View } from "react-native";
-import { Text } from "react-native-paper";
+import { Text,Divider } from "react-native-paper";
 
 import Background from "../components/Background";
 import Logo from "../components/Logo";
@@ -34,7 +34,7 @@ export default function LoginScreen({ navigation }) {
     <Background>
       <BackButton goBack={navigation.goBack} />
       <Logo />
-      <Header>Hello.</Header>
+      <Header>Welcome Back!</Header>
       <TextInput
         label="Email"
         returnKeyType="next"
@@ -55,6 +55,7 @@ export default function LoginScreen({ navigation }) {
         error={!!password.error}
         errorText={password.error}
         secureTextEntry
+        right_btn={true}
       />
       <View style={styles.forgotPassword}>
         <TouchableOpacity
@@ -66,12 +67,10 @@ export default function LoginScreen({ navigation }) {
       <Button mode="contained" onPress={onLoginPressed}>
         Log in
       </Button>
-      <View style={styles.row}>
-        <Text>You do not have an account yet ?</Text>
-      </View>
+      <Divider theme={{ colors: { primary: 'green' } }} />
       <View style={styles.row}>
         <TouchableOpacity onPress={() => navigation.replace("RegisterScreen")}>
-          <Text style={styles.link}>Create !</Text>
+          <View style={{flexDirection:'row'}}><Text>Don't have an account? </Text><Text style={styles.link}>Sign Up</Text></View>
         </TouchableOpacity>
       </View>
     </Background>
