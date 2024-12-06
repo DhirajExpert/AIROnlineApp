@@ -1,25 +1,15 @@
 import React, { useState } from 'react';
 import { StyleSheet, View, Text, FlatList, Dimensions, TouchableOpacity, TextInput, Button, Alert } from 'react-native';
-
-
-const data = [
-    { id: '1', name: 'Citation Module' },
-    { id: '2', name: 'Court Module' },
-    { id: '3', name: 'Lawyer Module' },
-    { id: '4', name: 'Browse by Bench' },
-    { id: '5', name: 'Browse By Judgement' },
-    { id: '6', name: 'Nominal Module' },
-    { id: '7', name: 'Topical Search' },
-    { id: '8', name: 'Test' },
-    { id: '9', name: 'Item 9' },
-];
-
+import { Searchbar } from 'react-native-paper';
+import FontAwesome from '@expo/vector-icons/FontAwesome';
+import { homePageGrid } from '../config/data';
 const numColumns = 3;
 
 export default function Dashboard({ navigation }) {
 
     const [name, setName] = useState({ value: "", error: "" });
-
+    const [searchQuery, setSearchQuery] = React.useState('');
+    
     const itemclick = (id) => {
         console.log("itemclick", id);
         switch (id) {
@@ -81,28 +71,12 @@ export default function Dashboard({ navigation }) {
     };
     return (
         <View style={styles.container}>
-
-            {/* <View style={{ flexDirection: 'row' }}>
-                <TextInput
-                    style={styles.textInput}
-                    onChangeText={(noteText) =>
-                        setName({ value: text, error: "" })
-                    }
-                    value={name.value}
-                    placeholderTextColor='white'
-                    underlineColorAndroid='transparent'>
-                </TextInput>
-                <TouchableOpacity onPress={() => submit()} style={styles.addButton}>
-                    <Text style={styles.addButtonText}>Add</Text>
-                </TouchableOpacity>
-            </View> */}
-
             <View style={{
                 flexDirection: 'row',
                 alignItems: 'center',
                 margin: 10,
             }}>
-                <TextInput
+                {/* <TextInput
                     style={styles.textInput}
                     placeholder="Search your keyword"
                     value={name.value}
@@ -112,47 +86,114 @@ export default function Dashboard({ navigation }) {
                     title="Submit"
                     mode="contained"
                     onPress={handlePress}
-                >Search</Button>
+                >Search</Button> */}
+                <Searchbar
+                    placeholder="Search"
+                    onChangeText={setSearchQuery}
+                    value={searchQuery}
+                />
             </View>
 
-            <FlatList
-                data={data}
+            {/* <FlatList
+                data={homePageGrid}
                 renderItem={({ item }) => renderItemData({ item })}
                 keyExtractor={(item) => item.id}
                 numColumns={numColumns}
                 contentContainerStyle={styles.grid}
+            /> */}
+            <Text style={styles.redBanner}>SEARCH JUDGMENTS</Text>
+            <FlatList
+                data={homePageGrid}
+                keyExtractor={(item) => item.id}
+                numColumns={3}
+                contentContainerStyle={styles.gridContainer}
+                renderItem={({ item }) => (
+                    <TouchableOpacity style={styles.gridItem}>
+                        <FontAwesome name={item.icon} size={24} color="#00578E" />
+                        <Text style={styles.gridLabel}>{item.label}</Text>
+                    </TouchableOpacity>
+                )}
             />
+            <View style={styles.resultHeader}>
+                <Text style={styles.resultTitle}>Supreme Court Of India</Text>
+                <TouchableOpacity>
+                    <Text style={styles.resultAction}>Select Court</Text>
+                </TouchableOpacity>
+            </View>
+
         </View>
     );
 }
+
+
 const styles = StyleSheet.create({
+    header: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        backgroundColor: '#00578E',
+        padding: 15,
+    },
+    headerText: {
+        color: '#fff',
+        fontSize: 18,
+        fontWeight: 'bold',
+    },
+    headerIcons: {
+        flexDirection: 'row',
+    },
+    icon: {
+        marginRight: 15,
+    },
     container: {
         flex: 1,
-        backgroundColor: '#f5f5f5',
+        backgroundColor: '#fff',
     },
-    grid: {
-        paddingHorizontal: 10,
+    redBanner: {
+        backgroundColor: '#D32F2F',
+        color: '#fff',
+        textAlign: 'center',
+        paddingVertical: 10,
+        fontWeight: 'bold',
+    },
+    gridContainer: {
+        padding: 0,
     },
     gridItem: {
         flex: 1,
-        margin: 5,
-        aspectRatio: 1, // Ensures the item is square
-        backgroundColor: '#4CAF50',
-        justifyContent: 'center',
         alignItems: 'center',
-        borderRadius: 8,
+        justifyContent: 'center',
+        padding: 10,
+        borderWidth: 1,
+        borderColor: '#D32F2F',
     },
-    itemText: {
+    gridLabel: {
+        marginTop: 5,
+        textAlign: 'center',
+        color: '#00578E',
+        fontSize: 12,
+    },
+    resultHeader: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        padding: 10,
+        backgroundColor: '#00578E',
+    },
+    resultTitle: {
         color: '#fff',
-        fontSize: 16,
         fontWeight: 'bold',
     },
-    textInput: {
-        flex: 1, // Ensures the TextInput takes available space
-        borderWidth: 1,
-        borderColor: '#ccc',
-        borderRadius: 4,
+    resultAction: {
+        color: '#FFD700',
+    },
+    resultItem: {
         padding: 10,
-        marginRight: 10,
+        fontWeight: 'bold',
+        color: '#333',
+    },
+    resultDescription: {
+        paddingHorizontal: 10,
+        color: '#666',
+        marginBottom: 10,
     },
 });

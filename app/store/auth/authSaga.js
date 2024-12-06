@@ -5,7 +5,7 @@ function* handleLogin() {
   try {
     // Simulate API call
     yield delay(1000);
-    const user = { id: 1, name: 'John Doe', email: 'john@example.com' };
+    const user = { id: 1, name: 'User User', email: 'user@example.com' };
     yield put(loginSuccess(user));
   } catch (error) {
     yield put(loginFailure('Login failed'));

@@ -1,6 +1,7 @@
 import * as SecureStore from 'expo-secure-store';
 
 export const saveSecureData = async (key, value) => {
+  console.log(key,value);
   await SecureStore.setItemAsync(key, value);
 };
 

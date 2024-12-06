@@ -1,6 +1,6 @@
-import React, { useState } from "react";
+import React, { useState,useEffect } from "react";
 import { TouchableOpacity, StyleSheet, View } from "react-native";
-import { Text,Divider,Checkbox } from "react-native-paper";
+import { Text, Divider,Checkbox } from "react-native-paper";
 
 import Background from "../components/Background";
 import Logo from "../components/Logo";
@@ -13,16 +13,18 @@ import { emailValidator } from "../helpers/emailValidator";
 import { passwordValidator } from "../helpers/passwordValidator";
 import { useDispatch, useSelector } from 'react-redux';
 import { loginRequest } from '../store/auth/authSlice';
+import { saveSecureData, getSecureData, deleteSecureData } from '../utils/secureStorage';
 
 export default function LoginScreen({ navigation }) {
   const [email, setEmail] = useState({ value: "", error: "" });
   const [password, setPassword] = useState({ value: "", error: "" });
   const [rememberMe, setRememberMe] = useState(false);
   
-  const dispatch = useDispatch();
+  //Redux toolkit
   const { loading, error } = useSelector((state) => state.auth);
+  const dispatch = useDispatch();
 
-  const onLoginPressed = () => {
+  const onLoginPressed = async() => {
     const emailError = emailValidator(email.value);
     const passwordError = passwordValidator(password.value);
     if (emailError || passwordError) {
@@ -30,15 +32,33 @@ export default function LoginScreen({ navigation }) {
       setPassword({ ...password, error: passwordError });
       return;
     }
+
+    if (rememberMe) {
+      await saveSecureData('email', email.value);
+    } else {
+      await deleteSecureData('email');
+    }
     dispatch(loginRequest())
-  
+
   };
+
+  useEffect(() => {
+    const loadCredentials = async () => {
+      const savedEmail = await getSecureData('email');
+      if (savedEmail) {
+        setEmail((preState)=>({...preState,value:savedEmail}));
+        setRememberMe(true);
+      }
+    };
+    loadCredentials();
+  }, []);
 
   return (
     <Background>
       <BackButton goBack={navigation.goBack} />
       <Logo />
       <Header>Welcome Back!</Header>
+    
       <TextInput
         label="Email"
         returnKeyType="next"
@@ -50,6 +70,7 @@ export default function LoginScreen({ navigation }) {
         autoCompleteType="email"
         textContentType="emailAddress"
         keyboardType="email-address"
+        
       />
       <TextInput
         label="Password"
@@ -72,13 +93,19 @@ export default function LoginScreen({ navigation }) {
         Log in
       </Button>
       <View style={styles.checkboxContainer}>
-        <CheckBox value={rememberMe} onValueChange={setRememberMe} />
+        <Checkbox
+        status={rememberMe ? 'checked' : 'unchecked'}
+          onPress={() => {
+            setRememberMe(!rememberMe);
+          }}
+          
+          />
         <Text>Remember Me</Text>
       </View>
       <Divider theme={{ colors: { primary: 'green' } }} />
       <View style={styles.row}>
         <TouchableOpacity onPress={() => navigation.replace("RegisterScreen")}>
-          <View style={{flexDirection:'row'}}><Text>Don't have an account? </Text><Text style={styles.link}>Sign Up</Text></View>
+          <View style={{ flexDirection: 'row' }}><Text>Don't have an account? </Text><Text style={styles.link}>Sign Up</Text></View>
         </TouchableOpacity>
       </View>
     </Background>
@@ -101,5 +128,11 @@ const styles = StyleSheet.create({
   link: {
     fontWeight: "bold",
     color: theme.colors.primary,
+  },
+  checkboxContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    alignSelf:'flex-start',
+    marginBottom: 10,
   },
 });

@@ -9,5 +9,6 @@ export const theme = {
     primary:"#083e89",
     secondary: "#1F2732",
     error: "#ED1C24",
+    bluebg:'#034673'
   },
 };
