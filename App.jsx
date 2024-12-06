@@ -1,6 +1,6 @@
 import { Provider as ReduxProvider } from "react-redux";
-import { store } from './app/store/store';
 import { Provider } from "react-native-paper";
+import { store } from './app/store/store';
 import { theme } from "./app/core/theme";
 import { AppNavigator } from "./app/navigation";
 
