@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { View, StyleSheet, TouchableOpacity, Linking } from "react-native";
+import { View, StyleSheet, TouchableOpacity, Linking, Alert } from "react-native";
 import { RadioButton, Text, Checkbox } from "react-native-paper";
 
 import Background from "../components/Background";
@@ -34,10 +34,72 @@ export default function RegisterScreen({ navigation }) {
 
 
 
-
-  const onNextStep = () => {
-    setStep(step + 1);
+  const onNextStep1 = () => {
+    if (validateStep1()) {
+      setStep(1); // Proceed to the next step
+    }
   };
+  const validateStep1 = () => {
+    let isValid = true;
+
+    if (!name.value.trim()) {
+      setName({ ...name, error: "Username is required!" });
+      isValid = false;
+    }
+
+    if (!password.value.trim()) {
+      setPassword({ ...password, error: "Password is required!" });
+      isValid = false;
+    } else if (password.value.length < 6) {
+      setPassword({ ...password, error: "Password must be at least 6 characters!" });
+      isValid = false;
+    }
+
+    const emailRegex = /^\S+@\S+\.\S+$/;
+    if (!email.value.trim()) {
+      setEmail({ ...email, error: "Email is required!" });
+      isValid = false;
+    } else if (!emailRegex.test(email.value)) {
+      setEmail({ ...email, error: "Invalid email format!" });
+      isValid = false;
+    }
+
+    if (!mobno.value.trim()) {
+      setMobNo({ ...mobno, error: "Mobile number is required!" });
+      isValid = false;
+    } else if (!/^\d{10}$/.test(mobno.value)) {
+      setMobNo({ ...mobno, error: "Invalid mobile number!" });
+      isValid = false;
+    }
+
+    if (!fullname.value.trim()) {
+      setFullName({ ...fullname, error: "Full name is required!" });
+      isValid = false;
+    }
+
+    return isValid;
+  };
+  const onNextStep = () => {
+
+    setStep(step + 1);
+    
+  };
+
+  const validateFields= ()=>{
+    const nameError = nameValidator(name.value);
+    const emailError = emailValidator(email.value);
+    const passwordError = passwordValidator(password.value);
+    if (emailError || passwordError || nameError) {
+      setName({ ...name, error: nameError });
+      setEmail({ ...email, error: emailError });
+      setPassword({ ...password, error: passwordError });
+      return false;
+    }
+    return true;
+      // setStep(step + 1);
+    
+
+  }
 
   const onPreviousStep = () => {
     setStep(step - 1);
@@ -46,107 +108,43 @@ export default function RegisterScreen({ navigation }) {
     Linking.openURL('https://www.aironline.in/terms-and-conditions.html');
   };
 
-
-
   const onSignUpPressed = () => {
-    const nameError = nameValidator(name.value);
-    const emailError = emailValidator(email.value);
-    const passwordError = passwordValidator(password.value);
-    if (emailError || passwordError || nameError) {
-      setName({ ...name, error: nameError });
-      setEmail({ ...email, error: emailError });
-      setPassword({ ...password, error: passwordError });
-      return;
+    
+    // navigation.reset({
+    //   index: 0,
+    //   routes: [{ name: "HomeScreen" }],
+    // });
+
+
+    if(value==='1'){
+      console.log("1");
+    }else{
+      console.log("2");
     }
-    navigation.reset({
-      index: 0,
-      routes: [{ name: "HomeScreen" }],
-    });
+    if (checked) {
+      console.log("Submit Button clicked");
+    } else {
+      Alert.alert("Please check i agree...")
+    }
+
   };
 
 
 
   return (
     <Background>
-      {/* <BackButton goBack={navigation.goBack} />
-      <Logo />
-      <Header>Welcome.</Header>
-      <TextInput
-        label="Desire Username"
-        returnKeyType="next"
-        value={name.value}
-        onChangeText={(text) => setName({ value: text, error: "" })}
-        error={!!name.error}
-        errorText={name.error}
-      />
-      <TextInput
-        label="Password"
-        returnKeyType="done"
-        value={password.value}
-        onChangeText={(text) => setPassword({ value: text, error: "" })}
-        error={!!password.error}
-        errorText={password.error}
-        secureTextEntry
-      />
-      <TextInput
-        label="Email"
-        returnKeyType="next"
-        value={email.value}
-        onChangeText={(text) => setEmail({ value: text, error: "" })}
-        error={!!email.error}
-        errorText={email.error}
-        autoCapitalize="none"
-        autoCompleteType="email"
-        textContentType="emailAddress"
-        keyboardType="email-address"
-      />
-
-      <TextInput
-        label="Mobile No."
-        returnKeyType="next"
-        value={mobno.value}
-        onChangeText={(text) => setMobNo({ value: text, error: "" })}
-        error={!!mobno.error}
-        errorText={mobno.error}
-      />
-      <TextInput
-        label="Full Name"
-        returnKeyType="next"
-        value={fullname.value}
-        onChangeText={(text) => setFullName({ value: text, error: "" })}
-        error={!!fullname.error}
-        errorText={fullname.error}
-      />
-
-      <Button
-        mode="contained"
-        onPress={onSignUpPressed}
-        style={{ marginTop: 24 }}
-      >
-        Next
-      </Button>
-      <View style={styles.row}>
-        <Text>I already have an account !</Text>
-      </View>
-      <View style={styles.row}>
-        <TouchableOpacity onPress={() => navigation.replace("LoginScreen")}>
-          <Text style={styles.link}>Log in</Text>
-        </TouchableOpacity>
-      </View> */}
-
       <View style={styles.container}>
-        <ProgressSteps>
+        <ProgressSteps step={step}>
           <ProgressStep
             label="Login Info"
-            onNext={onNextStep}
+            onNext={onNextStep1}
             onPrevious={onPreviousStep}
             nextBtnText="Next"
             previousBtnText="Previous"
+            removeBtnRow={false} 
           >
             <View style={styles.stepContent}>
-              {/* <BackButton goBack={navigation.goBack} /> */}
-              {/* <Logo /> */}
-              {/* <Header>Welcome.</Header> */}
+            
               <TextInput
                 label="Desire Username"
                 returnKeyType="next"
@@ -193,21 +191,7 @@ export default function RegisterScreen({ navigation }) {
                 errorText={fullname.error}
               />
 
-              {/* <Button
-        mode="contained"
-        onPress={onSignUpPressed}
-        style={{ marginTop: 24 }}
-      >
-        Next
-      </Button> */}
-              {/* <View style={styles.row}>
-        <Text>I already have an account !</Text>
-      </View>
-      <View style={styles.row}>
-        <TouchableOpacity onPress={() => navigation.replace("LoginScreen")}>
-          <Text style={styles.link}>Log in</Text>
-        </TouchableOpacity>
-      </View> */}
+              
             </View>
           </ProgressStep>
           <ProgressStep
@@ -238,32 +222,17 @@ export default function RegisterScreen({ navigation }) {
           </ProgressStep>
           <ProgressStep
             label="AGREEMENT"
-            // onPrevious={onPreviousStep}
-            //  previousBtnText="Previous"
-            finishBtnText="Register"
-            onSubmit={() => navigation.replace("LoginScreen")}
-            finishBtnStyle={styles.button}  
-            finishBtnTextStyle={styles.buttonText} 
+           
+            finishBtnText="Submit"
+            onSubmit={onSignUpPressed}
+            finishBtnStyle={styles.button}
+            finishBtnTextStyle={styles.buttonText}
           >
             <View style={styles.stepContent} >
               <RadioButton.Group
                 onValueChange={(newValue) => setValue(newValue)}
                 value={value}
               >
-                {/* <RadioButton.Android
-                  label="Activate with Demo Coupon"
-                  value="1"
-                  color="#1E6DAD"
-                  style={{ flexDirection: 'row-reverse', alignSelf: 'flex-start' }}
-                />
-                <RadioButton.Android
-                  label="Activate with Coupon Details"
-                  value="2"
-                  color="#1E6DAD"
-                  style={{ flexDirection: 'row-reverse', alignSelf: 'flex-start' }}
-                /> */}
-
-
                 <View style={styles.radioContainer}>
                   <View style={styles.radioItem}>
                     <RadioButton.Android // Use Android style explicitly

@@ -9,8 +9,8 @@ const data = [
     { id: '4', name: 'Browse by Bench' },
     { id: '5', name: 'Browse By Judgement' },
     { id: '6', name: 'Nominal Module' },
-    { id: '7', name: 'Item 7' },
-    { id: '8', name: 'Item 8' },
+    { id: '7', name: 'Topical Search' },
+    { id: '8', name: 'Test' },
     { id: '9', name: 'Item 9' },
 ];
 
@@ -42,10 +42,10 @@ export default function Dashboard({ navigation }) {
                 navigation.navigate('NominalSearch');
                 break;
             case '7':
-                // navigation.navigate('CitationSearch1');
+                navigation.navigate('TopicalSearch');
                 break;
             case '8':
-                // navigation.navigate('CitationSearch1');
+                navigation.navigate('Test');
                 break;
             case '9':
                 // navigation.navigate('CitationSearch1');

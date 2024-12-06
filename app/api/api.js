@@ -134,9 +134,9 @@ export const getCourtList = async (courtName) => {
 }
 export const getCourtDigestView = async (courtNameList, limit, offset) => {
 
-  console.log(`${API_URL}/digestView/digest?court=` + courtNameList + `&limit=` + limit + `&offset=` + offset + `&judges=` + '' + `&benchStrength=` + '' + `&fts=` + '' + `&acs=` + '');
+  console.log(`${API_URL}/digestView/digest?court=` + courtNameList + `&limit=` + limit + `&offset=` + offset + `&judges=` + '' + `&benchStrength=` + '' + `&fts=` + '' + `&acs=` + '' + `&topical=` + ''+ `&or=` + ''+ `&and=` + ''+`&benchTypeFullName=`+'');
   try {
-    const response = await axios.get(`${API_URL}/digestView/digest?court=` + courtNameList + `&limit=` + limit + `&offset=` + offset + `&judges=` + '' + `&benchStrength=` + '' + `&fts=` + '' + `&acs=` + '');
+    const response = await axios.get(`${API_URL}/digestView/digest?court=` + courtNameList + `&limit=` + limit + `&offset=` + offset + `&judges=` + '' + `&benchStrength=` + '' + `&fts=` + '' + `&acs=` + '' + `&topical=` + ''+ `&or=` + ''+ `&and=` + ''+`&benchTypeFullName=`+'');
     return response.data;
   } catch (error) {
     console.log("error", error)
@@ -215,10 +215,10 @@ export const getJudgementDateDetails = async (decision_period, fromDate, toDate,
 
 }
 
-export const getBenchStrengthDetails = async (benchStrength,limit, offset) => {
-  console.log(`${API_URL}/digestView/digest?benchStrength=` + benchStrength + `&limit=` + limit + `&offset=` + offset + `&judges=` + '' + `&court=` + '' + `&fts=` + '' + `&acs=` + '');
+export const getBenchStrengthDetails = async (benchStrength, limit, offset) => {
+  console.log("getBenchStrengthDetails", `${API_URL}/digestView/digest?benchStrength=` + benchStrength + `&limit=` + limit + `&offset=` + offset + `&judges=` + '' + `&court=` + '' + `&fts=` + '' + `&acs=` + '' + `&topical=` + ''+ `&or=` + ''+ `&and=`+'' + `&benchTypeFullName=`+'');
   try {
-    const response = await axios.get(`${API_URL}/digestView/digest?benchStrength=` + benchStrength + `&limit=` + limit + `&offset=` + offset + `&judges=` + '' + `&court=` + '' + `&fts=` + '' + `&acs=` + '');
+    const response = await axios.get(`${API_URL}/digestView/digest?benchStrength=` + benchStrength + `&limit=` + limit + `&offset=` + offset + `&judges=` + '' + `&court=` + '' + `&fts=` + '' + `&acs=` + '' + `&topical=` + ''+ `&or=` + ''+ `&and=` +''+ `&benchTypeFullName=`+'');
     return response.data;
   } catch (error) {
     console.log("error", error)
@@ -231,9 +231,38 @@ export const getBenchStrengthDetails = async (benchStrength,limit, offset) => {
 
 export const getFTSDigestView = async (fts, limit, offset) => {
 
-  console.log(`${API_URL}/digestView/digest?fts=` + fts + `&limit=` + limit + `&offset=` + offset + `&judges=` + '' + `&benchStrength=` + '' + `&court=` + '' + `&acs=` + '');
+  console.log(`${API_URL}/digestView/digest?fts=` + fts + `&limit=` + limit + `&offset=` + offset + `&judges=` + '' + `&benchStrength=` + '' + `&court=` + '' + `&acs=` + '' + `&topical=` + ''+ `&or=` + ''+ `&and=` + ''+ `&benchTypeFullName=`+'');
   try {
-    const response = await axios.get(`${API_URL}/digestView/digest?fts=` + fts + `&limit=` + limit + `&offset=` + offset + `&judges=` + '' + `&benchStrength=` + '' + `&court=` + '' + `&acs=` + '');
+    const response = await axios.get(`${API_URL}/digestView/digest?fts=` + fts + `&limit=` + limit + `&offset=` + offset + `&judges=` + '' + `&benchStrength=` + '' + `&court=` + '' + `&acs=` + '' + `&topical=` + ''+ `&or=` + ''+ `&and=` + ''+ `&benchTypeFullName=`+'');
+    return response.data;
+  } catch (error) {
+    console.log("error", error)
+    if (axios.isAxiosError(error)) {
+      throw error.response?.data || 'An error occurred';
+    }
+    throw 'An unexpected error occurred';
+  }
+}
+
+export const getTopicalDigestView = async (searchword, limit, offset) => {
+
+  console.log(`${API_URL}/digestView/digest?topical=` + searchword + `&limit=` + limit + `&offset=` + offset + `&judges=` + '' + `&benchStrength=` + '' + `&court=` + '' + `&acs=` + '' + `&fts=` + ''+ `&or=` + ''+ `&and=` + ''+ `&benchTypeFullName=`+'');
+  try {
+    const response = await axios.get(`${API_URL}/digestView/digest?topical=` + searchword + `&limit=` + limit + `&offset=` + offset + `&judges=` + '' + `&benchStrength=` + '' + `&court=` + '' + `&acs=` + '' + `&fts=` + ''+ `&or=` + ''+ `&and=` + ''+ `&benchTypeFullName=`+'');
+    return response.data;
+  } catch (error) {
+    console.log("error", error)
+    if (axios.isAxiosError(error)) {
+      throw error.response?.data || 'An error occurred';
+    }
+    throw 'An unexpected error occurred';
+  }
+}
+
+export const getTopicalWords = async (topic) => {
+  console.log(`${API_URL}/topic/topicname?searchTopic=` + topic );
+  try {
+    const response = await axios.get(`${API_URL}/topic/topicname?searchTopic=` + topic );
     return response.data;
   } catch (error) {
     console.log("error", error)
