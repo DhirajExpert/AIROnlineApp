@@ -1,10 +1,10 @@
 import React from "react";
 import { View, StyleSheet, Text } from "react-native";
 import { TextInput as Input } from "react-native-paper";
-
+import Ionicons from '@expo/vector-icons/Ionicons';
 import { theme } from "../core/theme";
 
-export default function TextInput({ errorText, description, ...props }) {
+export default function TextInput({ errorText, description,right_btn=false, ...props }) {
   return (
     <View style={styles.container}>
       <Input
@@ -13,6 +13,9 @@ export default function TextInput({ errorText, description, ...props }) {
         underlineColor="transparent"
         mode="outlined"
         {...props}
+        right={
+          right_btn ? <Ionicons name="eye-outline" size={24} color="black" /> :null
+        }
         
       />
       {description && !errorText ? (
@@ -42,3 +45,4 @@ const styles = StyleSheet.create({
     paddingTop: 8,
   },
 });
+
