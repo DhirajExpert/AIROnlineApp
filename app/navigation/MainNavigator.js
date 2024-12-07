@@ -134,7 +134,7 @@ const MainNavigator = () => (
         <Drawer.Screen name="Home Page" component={TabNavigator}
             options={{
                 headerShown: true,
-                headerBackground: '#034673',
+                //headerBackground: '#034673',
                 title: "Air Online"
             }}
         />
