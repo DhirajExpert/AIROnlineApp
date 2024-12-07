@@ -2,7 +2,7 @@ import { createDrawerNavigator } from '@react-navigation/drawer';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { createStackNavigator } from '@react-navigation/stack';
 import DrawerContent from './DrawerContent';
-import { Icon, MD3Colors } from 'react-native-paper';
+import { Icon, MD3Colors,Button } from 'react-native-paper';
 
 import {
     ResetPasswordScreen,
@@ -134,7 +134,6 @@ const MainNavigator = () => (
         <Drawer.Screen name="Home Page" component={TabNavigator}
             options={{
                 headerShown: true,
-                headerBackground: '#034673',
                 title: "Air Online"
             }}
         />
