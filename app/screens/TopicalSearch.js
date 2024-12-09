@@ -11,9 +11,6 @@ export default function TopicalSearch({ navigation }) {
     const [query, setQuery] = useState('');
     const [filteredData, setFilteredData] = useState([]);
 
-    // Sample data to filter
-    // const data = ['Apple', 'Banana', 'Cherry', 'Date', 'Grapes', 'Mango', 'Orange'];
-
     const handleSearch = async (text) => {
         setQuery(text);
 

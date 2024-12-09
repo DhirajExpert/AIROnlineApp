@@ -35,10 +35,13 @@ import {
   FreeTextSearchDetails,
   TopicalSearch,
   TopicalSearchDetails,
-  Test
+  Test,
+  Register,
+  BrowseByJudgeDetails,
+  JudgementDateDetails,
 
 } from "./app/screens";
-import JudgementDateDetails from "./app/screens/JudgementDateDetails";
+
 
 
 const Stack = createStackNavigator();
@@ -48,7 +51,7 @@ export default function App() {
     <Provider theme={theme}>
       <NavigationContainer>
         <Stack.Navigator
-          initialRouteName="RegisterScreen"
+          initialRouteName="Dashboard"
         // screenOptions={{
         //   headerShown: false,
         // }}
@@ -92,6 +95,9 @@ export default function App() {
           <Stack.Screen name="TopicalSearch" component={TopicalSearch} />
           <Stack.Screen name="TopicalSearchDetails" component={TopicalSearchDetails}/>
           <Stack.Screen name="Test" component={Test}/>
+          <Stack.Screen name="Register" component={Register}/>
+          <Stack.Screen name="BrowseByJudgeDetails" component={BrowseByJudgeDetails}/>
+
           <Stack.Screen
             name="ResetPasswordScreen"
             component={ResetPasswordScreen}

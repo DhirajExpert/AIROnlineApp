@@ -272,3 +272,56 @@ export const getTopicalWords = async (topic) => {
     throw 'An unexpected error occurred';
   }
 }
+
+export const RegisterApi = async (name,email,mobno,password,fullname) => {
+  console.log(`${API_URL}/opi/users/registration?username=`+name+
+`&password=`+password+
+`&email=`+email+
+`&fullName=`+fullname+
+`&mobileNumber=`+mobno+
+`&countryCode=`+91);
+  try {
+    const response = await axios.get(`${API_URL}/opi/users/registration?username=`+name+
+`&password=`+password+
+`&email=`+email+
+`&fullName=`+fullname+
+`&mobileNumber=`+mobno+
+`&countryCode=`+91);
+    return response.data;
+  } catch (error) {
+    console.log("error", error)
+    if (axios.isAxiosError(error)) {
+      throw error.response?.data || 'An error occurred';
+    }
+    throw 'An unexpected error occurred';
+  }
+}
+
+export const getJudgesList = async (name) => {
+  console.log(`${API_URL}/judge/judgeNameList?searchJudgeName=` + name );
+  try {
+    const response = await axios.get(`${API_URL}/judge/judgeNameList?searchJudgeName=` + name );
+    return response.data;
+  } catch (error) {
+    console.log("error", error)
+    if (axios.isAxiosError(error)) {
+      throw error.response?.data || 'An error occurred';
+    }
+    throw 'An unexpected error occurred';
+  }
+}
+
+export const getJudgeDetails = async (judgesList, and,or,limit, offset) => {
+  console.log("getJudgeDetails", `${API_URL}/digestView/digest?judges=` + judgesList + `&limit=` + limit + `&offset=` + offset + `&court=` + '' + `&fts=` + '' + `&acs=` + '' + `&topical=` + ''+ `&or=` + or+ `&and=`+and + `&benchTypeFullName=`+''+`&benchStrength=`+'');
+  try {
+    const response = await axios.get(`${API_URL}/digestView/digest?judges=` + judgesList + `&limit=` + limit + `&offset=` + offset + `&court=` + '' + `&fts=` + '' + `&acs=` + '' + `&topical=` + ''+ `&or=` + or+ `&and=`+and + `&benchTypeFullName=`+''+`&benchStrength=`+'');
+    return response.data;
+  } catch (error) {
+    console.log("error", error)
+    if (axios.isAxiosError(error)) {
+      throw error.response?.data || 'An error occurred';
+    }
+    throw 'An unexpected error occurred';
+  }
+}
+

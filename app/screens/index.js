@@ -28,3 +28,5 @@ export {default as FreeTextSearchDetails} from "./FreeTextSearchDetails";
 export {default as TopicalSearch} from "./TopicalSearch";
 export {default as TopicalSearchDetails} from "./TopicalSearchDetails";
 export {default as Test} from "./Test";
+export {default as Register} from "./Register";
+export {default as BrowseByJudgeDetails} from "./BrowseByJudgeDetails";

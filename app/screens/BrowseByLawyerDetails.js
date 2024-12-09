@@ -8,8 +8,8 @@ export default function BrowseByLawyerDetails({ route, navigation }) {
     const [responseDigestView, setResponseDigestView] = useState([]);
     const [expandedNotes, setExpandedNotes] = useState({});
 
-    const [page, setPage] = useState(0); // To keep track of the current page
-    const [loading, setLoading] = useState(false); // Loading state for pagination
+    const [page, setPage] = useState(0); 
+    const [loading, setLoading] = useState(false); 
     const [hasMore, setHasMore] = useState(true);
 
     const [offset, setOffset] = useState(0);  

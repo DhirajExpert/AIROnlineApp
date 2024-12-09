@@ -32,8 +32,6 @@ export default function RegisterScreen({ navigation }) {
   const [value, setValue] = useState('1');
   const [checked, setChecked] = useState(false);
 
-
-
   const onNextStep1 = () => {
     if (validateStep1()) {
       setStep(1); // Proceed to the next step

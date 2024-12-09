@@ -11,7 +11,7 @@ const data = [
     { id: '6', name: 'Nominal Module' },
     { id: '7', name: 'Topical Search' },
     { id: '8', name: 'Test' },
-    { id: '9', name: 'Item 9' },
+    { id: '9', name: 'BrowseByJudge' },
 ];
 
 const numColumns = 3;
@@ -48,7 +48,7 @@ export default function Dashboard({ navigation }) {
                 navigation.navigate('Test');
                 break;
             case '9':
-                // navigation.navigate('CitationSearch1');
+                navigation.navigate('BrowseByJudge');
                 break;
 
             default:
