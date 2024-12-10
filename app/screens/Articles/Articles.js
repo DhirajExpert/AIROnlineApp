@@ -1,8 +1,8 @@
 import react, { useState } from "react"
 import { StyleSheet, View } from "react-native"
-import TextInput from "../components/TextInput";
-import Button from '../components/Button';
-import Header from "../components/Header";
+import TextInput from "../../components/TextInput";
+import Button from '../../components/Button';
+import Header from "../../components/Header";
 import { SafeAreaView } from "react-native-safe-area-context"
 import AntDesign from "@expo/vector-icons/AntDesign"
 import { Modal, Text } from "react-native-paper";

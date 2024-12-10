@@ -1,8 +1,8 @@
 import React, { useEffect, useState, useRef } from "react";
 import { FlatList, StyleSheet, Text, View, TouchableOpacity, ActivityIndicator, Pressable } from "react-native";
-import { getBenchStrengthDetails } from "../api/api";
+import { getBenchStrengthDetails } from "../../api/api";
 import { SafeAreaView } from "react-native-safe-area-context";
-import globalStyle from "../core/Style";
+import globalStyle from "../../core/Style";
 
 export default function BenchStrengthDetails({ route, navigation }) {
     const { benchStrength } = route.params;

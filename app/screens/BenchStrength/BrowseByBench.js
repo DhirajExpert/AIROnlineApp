@@ -1,9 +1,9 @@
 import react, { useState } from "react";
 import { StyleSheet, View } from "react-native"
 import { SafeAreaView } from "react-native-safe-area-context";
-import Header from "../components/Header";
+import Header from "../../components/Header";
 import { SelectList } from 'react-native-dropdown-select-list'
-import Button from "../components/Button";
+import Button from "../../components/Button";
 export default function BrowseByBench() {
     const [selected, setSelected] = useState("");
 

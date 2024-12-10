@@ -1,14 +1,14 @@
 import React, { useEffect, useState } from "react";
 import { StyleSheet, View, ScrollView, Text, Alert, FlatList, TouchableOpacity } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import TextInput from "../components/TextInput";
-import Button from "../components/Button";
-import Header from "../components/Header";
+import TextInput from "../../components/TextInput";
+import Button from "../../components/Button";
+import Header from "../../components/Header";
 import Icon from 'react-native-vector-icons/FontAwesome';
 import { Checkbox } from 'react-native-paper';
 
 
-import { getCourtList } from '../api/api';
+import { getCourtList } from '../../api/api';
 export default function BrowseByCourt({ navigation }) {
     const [name, setName] = useState({ value: "", error: "" });
     const [checkedItems, setCheckedItems] = useState([]);

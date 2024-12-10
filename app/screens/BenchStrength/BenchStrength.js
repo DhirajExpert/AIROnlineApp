@@ -1,11 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import { StyleSheet, Text, View, Alert } from "react-native";
-import { getBenchStrength } from "../api/api";
+import { getBenchStrength } from "../../api/api";
 import { Dropdown } from 'react-native-element-dropdown';
 import AntDesign from '@expo/vector-icons/AntDesign';
-import Header from '../components/Header';
+import Header from '../../components/Header';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import Button from '../components/Button';
+import Button from '../../components/Button';
 import DropDownPicker from 'react-native-dropdown-picker';
 
 export default function BenchStrength({ navigation }) {
