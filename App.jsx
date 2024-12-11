@@ -42,8 +42,6 @@ import {
 
 } from "./app/screens";
 
-
-
 const Stack = createStackNavigator();
 
 export default function App() {

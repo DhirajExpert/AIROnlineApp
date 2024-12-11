@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { StyleSheet, Text, View, Alert } from "react-native";
+import { StyleSheet, Text, View, Alert, TouchableOpacity } from "react-native";
 import { getBenchStrength } from "../api/api";
 import { Dropdown } from 'react-native-element-dropdown';
 import AntDesign from '@expo/vector-icons/AntDesign';
@@ -19,6 +19,10 @@ export default function BenchStrength({ navigation }) {
         { label: 'Petitioner', value: 'Petitioner' },
         { label: 'Respondent', value: 'Respondent' },
     ]);
+
+    const [activeInput, setActiveInput] = useState('one');
+
+
     useEffect(() => {
         const fetchBenchStrength = async () => {
             response = await getBenchStrength();
@@ -47,47 +51,85 @@ export default function BenchStrength({ navigation }) {
             })
         }
     }
+
+    const isDropdownDisabled = activeInput !== 'one';
+    const isCourtDropdownDisabled = activeInput !== 'two';
     return (
         <SafeAreaView edges={['left', 'right', 'bottom']} style={styles.safeArea}>
             <Header>Bench Strength Module</Header>
             <View style={styles.container}>
-                <Dropdown
-                    style={styles.dropdown}
-                    placeholderStyle={styles.placeholderStyle}
-                    selectedTextStyle={styles.selectedTextStyle}
-                    inputSearchStyle={styles.inputSearchStyle}
-                    iconStyle={styles.iconStyle}
-                    data={items}
-                    search
-                    maxHeight={300}
-                    labelField="label"
-                    valueField="label"
-                    placeholder="Select Bench"
-                    searchPlaceholder="Search..."
-                    value={selectedCourtName}
-                    onChange={item => {
-                        setCourtValue(item.label);
-                    }}
-                    renderLeftIcon={() => (
-                        <AntDesign style={styles.icon} color="black" name="Safety" size={20} />
-                    )}
-                    renderItem={renderItem} />
+
+                <View style={styles.radioContainer}>
+                    <TouchableOpacity
+                        style={styles.radioButton}
+                        onPress={() => setActiveInput('one')}
+                    >
+                        <View style={styles.outerCircle}>
+                            {activeInput === 'one' && <View style={styles.innerCircle} />}
+                        </View>
+                        <Text style={styles.radioText}>Bench</Text>
+                    </TouchableOpacity>
+
+
+                </View>
+                <View pointerEvents={isDropdownDisabled ? 'none' : 'auto'}>
+                    <Dropdown
+                        style={[styles.dropdown,
+                        activeInput === 'two' && styles.disabledInput,
+                        ]}
+                        placeholderStyle={styles.placeholderStyle}
+                        selectedTextStyle={styles.selectedTextStyle}
+                        inputSearchStyle={styles.inputSearchStyle}
+                        iconStyle={styles.iconStyle}
+                        data={items}
+                        search
+                        maxHeight={300}
+                        labelField="label"
+                        valueField="label"
+                        placeholder="Select Bench"
+                        searchPlaceholder="Search..."
+                        value={selectedCourtName}
+                        onChange={item => {
+                            setCourtValue(item.label);
+                        }}
+                        renderLeftIcon={() => (
+                            <AntDesign style={styles.icon} color="black" name="Safety" size={20} />
+                        )}
+                        renderItem={renderItem} />
+                </View>
                 <Text style={{
-                    alignSelf: 'center',marginVertical:20,fontWeight:'bold',fontSize:18
+                    alignSelf: 'center', marginVertical: 20, fontWeight: 'bold', fontSize: 18
                 }}>OR</Text>
-                <DropDownPicker
-                    style={styles.dropdownpicker}
-                    open={open}
-                    value={value}
-                    items={benchType}
-                    setOpen={setOpen}
-                    setValue={setValue}
-                    setItems={setBenchType}
-                    dropDownContainerStyle={styles.dropdownContainer}
-                />
+
+                <View style={styles.radioContainer}>
+                    <TouchableOpacity
+                        style={styles.radioButton}
+                        onPress={() => setActiveInput('two')}
+                    >
+                        <View style={styles.outerCircle}>
+                            {activeInput === 'two' && <View style={styles.innerCircle} />}
+                        </View>
+                        <Text style={styles.radioText}>HON'BLE Judges </Text>
+                    </TouchableOpacity>
+                </View>
+                <View pointerEvents={isCourtDropdownDisabled ? 'none' : 'auto'}>
+                    <DropDownPicker
+                        style={[styles.dropdownpicker,
+                        activeInput === 'one' && styles.disabledInput,
+                        ]}
+                        open={open}
+                        value={value}
+                        items={benchType}
+                        setOpen={setOpen}
+                        setValue={setValue}
+                        setItems={setBenchType}
+                        dropDownContainerStyle={styles.dropdownContainer}
+                    />
+                </View>
+
                 <Button
                     style={{
-                        marginTop: 30
+                        marginTop: 100
                     }}
                     mode="contained"
                     onPress={() => onSubmit()
@@ -95,7 +137,7 @@ export default function BenchStrength({ navigation }) {
                     Search
                 </Button>
 
-                
+
             </View>
         </SafeAreaView>
     );
@@ -114,8 +156,37 @@ const styles = StyleSheet.create({
         // paddingHorizontal: 20,
         flexDirection: "column"
     },
+    radioContainer: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        marginBottom: 20,
+    },
+    radioButton: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        marginRight: 20,
+    },
+    outerCircle: {
+        height: 20,
+        width: 20,
+        borderRadius: 10,
+        borderWidth: 2,
+        borderColor: 'gray',
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    innerCircle: {
+        height: 12,
+        width: 12,
+        borderRadius: 6,
+        backgroundColor: 'blue',
+    },
+    radioText: {
+        marginLeft: 8,
+        fontSize: 16,
+    },
     dropdown: {
-        marginTop: 10,
+        // marginTop: 10,
         width: '100%',
         // margin: 15,
         height: 50,
@@ -157,7 +228,7 @@ const styles = StyleSheet.create({
         fontSize: 16,
     },
     dropdownpicker: {
-        
+
         marginBottom: 20,
         width: '100%',
         borderColor: '#ccc',
@@ -174,6 +245,12 @@ const styles = StyleSheet.create({
         elevation: 2,
         // padding:15,
         // margin: 15
+    },
+    dropdownContainer: {
+        width: '100%',
+    },
+    disabledInput: {
+        backgroundColor: '#f0f0f0',
     },
 
 })
