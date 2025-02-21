@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-
+import {View} from "react-native"
 import Background from "../components/Background";
 import BackButton from "../components/BackButton";
 import Logo from "../components/Logo";
@@ -21,7 +21,8 @@ export default function ResetPasswordScreen({ navigation }) {
   };
 
   return (
-    <Background>
+    // <Background>
+    <View>
       <BackButton goBack={() => navigation.goBack()} />
       <Logo />
       <Header>Reset your password.</Header>
@@ -45,6 +46,7 @@ export default function ResetPasswordScreen({ navigation }) {
       >
         Continue
       </Button>
-    </Background>
+      </View>
+    // </Background>
   );
 }

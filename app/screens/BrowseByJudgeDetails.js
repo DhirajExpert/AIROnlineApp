@@ -25,7 +25,8 @@ export default function BrowseByJudgeDetails({ route, navigation }) {
         try {
             var and = '';
             var or = '';
-            const judgesnameList = judgesname.map(judge => `&judges=${judge}`).join('');
+            
+            const judgesnameList =  judgesname.join("&judges=");
             if (flag === '1') {
                 or = 'OR';
             }

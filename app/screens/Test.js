@@ -1,281 +1,200 @@
+import React, { useState } from "react";
+import { View, Text, TextInput, Button, StyleSheet, FlatList, TouchableOpacity } from "react-native";
 
-import React, { useState, useEffect } from 'react';
-import { View, TextInput, Text, StyleSheet, TouchableOpacity } from 'react-native';
-import { Dropdown } from 'react-native-element-dropdown';
-import AntDesign from '@expo/vector-icons/AntDesign';
-import DropDownPicker from 'react-native-dropdown-picker';
-import { getBenchStrength } from "../api/api";
-import Button from '../components/Button';
+const products = [
+  { id: 1, name: "Professional Online", rate: 18000 },
+  { id: 2, name: "Judgment Download Package", rate: 2500 },
+  { id: 3, name: "Supreme Court of India + Andhra Pradesh HC", rate: 8390 },
+  { id: 4, name: "Judgment Download Package 10 Downloads", rate: 900 },
+  { id: 5, name: "Judgment Download Package 15 Downloads", rate: 1250 },
+  // Add more products as needed...
+];
 
-export default function Test() {
+const GST_RATE = 0.18;
 
-    const [inputOne, setInputOne] = useState('');
-    const [inputTwo, setInputTwo] = useState('');
-    const [activeInput, setActiveInput] = useState('one');
-    const [submittedValue, setSubmittedValue] = useState('');
-    const [items, setItems] = useState([]);
-    const [selectedCourtName, setSelectedCourtName] = useState(null);
-   
-    const [open, setOpen] = useState(false);
-    const [value, setValue] = useState("Either Petitioner or Respondent");
-    const [benchType, setBenchType] = useState([
-        { label: 'Either Petitioner or Respondent', value: 'Either Petitioner or Respondent' },
-        { label: 'Petitioner', value: 'Petitioner' },
-        { label: 'Respondent', value: 'Respondent' },
-    ]);
-    useEffect(() => {
-        const fetchBenchStrength = async () => {
-            response = await getBenchStrength();
-            console.log("Response", response);
-            const benchStrengthData = response.benchName.map(label => ({ label }));
-            console.log("benchStrengthData", benchStrengthData);
-            setItems(benchStrengthData);
-        }
-        fetchBenchStrength();
-    }, []);
+const ProductRow = ({ product, onQuantityChange }) => {
+  const [quantity, setQuantity] = useState(0);
 
-    const handleSubmit = () => {
-        if (activeInput === 'one') {
-            setSubmittedValue(inputOne);
-        } else {
-            setSubmittedValue(inputTwo);
-        }
-    };
-    const isDropdownDisabled = activeInput !== 'one';
-    const isCourtDropdownDisabled = activeInput !== 'two';
+  const handleQuantityChange = (newQuantity) => {
+    const numericQuantity = parseInt(newQuantity) || 0;
+    setQuantity(numericQuantity);
+    onQuantityChange(product.id, numericQuantity);
+  };
 
-    const renderItem = item => (
-        <View style={styles.item}>
-            <Text style={styles.textItem}>{item.label}</Text>
-        </View>
+  return (
+    <View style={styles.row}>
+      <Text style={styles.productName}>{product.name}</Text>
+      <Text style={styles.rate}>{`₹${product.rate}`}</Text>
+      <TextInput
+        style={styles.quantityInput}
+        keyboardType="numeric"
+        value={quantity.toString()}
+        onChangeText={handleQuantityChange}
+      />
+      <Text style={styles.totalAmount}>{`₹${product.rate * quantity}`}</Text>
+    </View>
+  );
+};
+
+const Test = () => {
+  const [quantities, setQuantities] = useState({});
+
+  const handleQuantityChange = (productId, quantity) => {
+    setQuantities((prev) => ({ ...prev, [productId]: quantity }));
+  };
+
+  const calculateTotal = () => {
+    return products.reduce(
+      (total, product) =>
+        total + (quantities[product.id] || 0) * product.rate,
+      0
     );
-    return (
-        <View style={styles.container}>
-            {/* <Text style={styles.label}>Select Active Input:</Text> */}
-            <View style={styles.radioContainer}>
-                <TouchableOpacity
-                    style={styles.radioButton}
-                    onPress={() => setActiveInput('one')}
-                >
-                    <View style={styles.outerCircle}>
-                        {activeInput === 'one' && <View style={styles.innerCircle} />}
-                    </View>
-                    <Text style={styles.radioText}>Bench</Text>
-                </TouchableOpacity>
+  };
 
+  const totalAmount = calculateTotal();
+  const gstAmount = totalAmount * GST_RATE;
+  const grandTotal = totalAmount + gstAmount;
 
-            </View>
-
-
-            {/* <TextInput
-                style={[
-                    styles.input,
-                    activeInput === 'two' && styles.disabledInput,
-                ]}
-                placeholder="Enter value for Input 1"
-                value={inputOne}
-                onChangeText={setInputOne}
-                editable={activeInput === 'one'}
-            /> */}
-            <View pointerEvents={isDropdownDisabled ? 'none' : 'auto'}>
-                <Dropdown
-                    style={[styles.dropdown,
-                    activeInput === 'two' && styles.disabledInput,
-                    ]}
-                    placeholderStyle={styles.placeholderStyle}
-                    selectedTextStyle={styles.selectedTextStyle}
-                    inputSearchStyle={styles.inputSearchStyle}
-                    iconStyle={styles.iconStyle}
-                    data={items}
-                    search
-                    maxHeight={300}
-                    labelField="label"
-                    valueField="label"
-                    placeholder="Select Bench"
-                    searchPlaceholder="Search..."
-                    value={selectedCourtName}
-                    onChange={item => {
-                        setCourtValue(item.label);
-                    }}
-                    renderLeftIcon={() => (
-                        <AntDesign style={styles.icon} color="black" name="Safety" size={20} />
-                    )}
-                    renderItem={renderItem}
-                // editable={activeInput === 'one'} 
-
-                />
-            </View>
-
-            <View style={styles.radioContainer}>
-                <TouchableOpacity
-                    style={styles.radioButton}
-                    onPress={() => setActiveInput('two')}
-                >
-                    <View style={styles.outerCircle}>
-                        {activeInput === 'two' && <View style={styles.innerCircle} />}
-                    </View>
-                    <Text style={styles.radioText}>HON'BLE Judges </Text>
-                </TouchableOpacity>
-            </View>
-
-            {/* <TextInput
-                style={[
-                    styles.input,
-                    activeInput === 'one' && styles.disabledInput,
-                ]}
-                placeholder="Enter value for Input 2"
-                value={inputTwo}
-                onChangeText={setInputTwo}
-                editable={activeInput === 'two'}
-            /> */}
-            <View pointerEvents={isCourtDropdownDisabled ? 'none' : 'auto'}>
-                <DropDownPicker
-                    style={styles.dropdownpicker}
-                    open={open && !isCourtDropdownDisabled}
-                    value={value}
-                    items={benchType}
-                    setOpen={setOpen}
-                    setValue={setValue}
-                    setItems={setBenchType}
-                    dropDownContainerStyle={styles.dropdownContainer}
-
-                />
-            </View>
-            {/* <TouchableOpacity style={styles.submitButton} onPress={handleSubmit}>
-                <Text style={styles.submitText}>Submit</Text>
-            </TouchableOpacity> */}
-
-            <Button
-                style={{
-                    marginTop: 30
-                }}
-                mode="contained"
-                onPress={() => onSubmit()
-                }>
-                Search
-            </Button>
-
-            {/* {submittedValue !== '' && (
-                <Text style={styles.resultText}>Submitted Value: {submittedValue}</Text>
-            )} */}
+  return (
+    <View style={styles.container}>
+      <Text style={styles.header}>Shop Product</Text>
+      <View style={styles.tableHeader}>
+        <Text style={styles.tableHeaderText}>Product</Text>
+        <Text style={styles.tableHeaderText}>Rate/Qty ₹</Text>
+        <Text style={styles.tableHeaderText}>Quantity</Text>
+        <Text style={styles.tableHeaderText}>Total Amount ₹</Text>
+      </View>
+      <FlatList
+        data={products}
+        keyExtractor={(item) => item.id.toString()}
+        renderItem={({ item }) => (
+          <ProductRow
+            product={item}
+            onQuantityChange={handleQuantityChange}
+          />
+        )}
+      />
+      <View style={styles.summary}>
+        <View style={styles.summaryRow}>
+          <Text style={styles.summaryLabel}>Total:</Text>
+          <Text style={styles.summaryValue}>{`₹${totalAmount.toFixed(2)}`}</Text>
         </View>
-    );
-}
+        <View style={styles.summaryRow}>
+          <Text style={styles.summaryLabel}>GST [18%]:</Text>
+          <Text style={styles.summaryValue}>{`₹${gstAmount.toFixed(2)}`}</Text>
+        </View>
+        <View style={styles.summaryRow}>
+          <Text style={styles.summaryLabel}>Grand Total:</Text>
+          <Text style={styles.summaryValue}>{`₹${grandTotal.toFixed(2)}`}</Text>
+        </View>
+        <TouchableOpacity style={styles.submitButton}>
+          <Text style={styles.submitButtonText}>SUBMIT</Text>
+        </TouchableOpacity>
+      </View>
+      <View style={styles.footer}>
+        <Text style={styles.footerText}>Contact Us: All India Reporter Pvt. Ltd.</Text>
+        <Text style={styles.footerText}>Terms & Conditions</Text>
+      </View>
+    </View>
+  );
+};
 
 const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        // justifyContent: 'center',
-        padding: 20,
-    },
-    radioContainer: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        marginBottom: 20,
-    },
-    radioButton: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        marginRight: 20,
-    },
-    outerCircle: {
-        height: 20,
-        width: 20,
-        borderRadius: 10,
-        borderWidth: 2,
-        borderColor: 'gray',
-        justifyContent: 'center',
-        alignItems: 'center',
-    },
-    innerCircle: {
-        height: 12,
-        width: 12,
-        borderRadius: 6,
-        backgroundColor: 'blue',
-    },
-    radioText: {
-        marginLeft: 8,
-        fontSize: 16,
-    },
-    label: {
-        fontSize: 16,
-        marginBottom: 5,
-    },
-    input: {
-        borderWidth: 1,
-        borderColor: 'gray',
-        padding: 10,
-        borderRadius: 5,
-        marginBottom: 20,
-    },
-    disabledInput: {
-        backgroundColor: '#f0f0f0',
-    },
-    submitButton: {
-        backgroundColor: 'blue',
-        padding: 10,
-        borderRadius: 5,
-        alignItems: 'center',
-        marginTop: 10,
-    },
-    submitText: {
-        color: 'white',
-        fontSize: 16,
-    },
-    resultText: {
-        marginTop: 20,
-        fontSize: 16,
-        color: 'green',
-    },
-    dropdown: {
-        marginTop: 10,
-        width: '100%',
-        // margin: 15,
-        height: 50,
-        backgroundColor: 'white',
-        borderRadius: 12,
-        padding: 12,
-        shadowColor: '#000',
-        shadowOffset: {
-            width: 0,
-            height: 1,
-        },
-        shadowOpacity: 0.2,
-        shadowRadius: 1.41,
-        elevation: 2,
-    },
-    placeholderStyle: {
-        fontSize: 16,
-    },
-    selectedTextStyle: {
-        fontSize: 16,
-
-    },
-    inputSearchStyle: {
-        height: 40,
-        fontSize: 16,
-    },
-    dropdownpicker: {
-        
-        marginBottom: 20,
-        width: '100%',
-        borderColor: '#ccc',
-        borderWidth: 1,
-        borderRadius: 12,
-        shadowColor: '#000',
-        shadowOffset: {
-            width: 0,
-            height: 1,
-        },
-        shadowOpacity: 0.2,
-        shadowRadius: 1.41,
-
-        elevation: 2,
-        // padding:15,
-        // margin: 15
-    },
-    iconStyle: {
-        width: 20,
-        height: 20,
-    },
+  container: {
+    flex: 1,
+    padding: 10,
+    backgroundColor: "#f9f9f9",
+  },
+  header: {
+    fontSize: 20,
+    fontWeight: "bold",
+    marginBottom: 10,
+    textAlign: "center",
+  },
+  tableHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    marginBottom: 5,
+    backgroundColor: "#e0e0e0",
+    padding: 10,
+  },
+  tableHeaderText: {
+    flex: 1,
+    textAlign: "center",
+    fontWeight: "bold",
+  },
+  row: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 5,
+    padding: 10,
+    backgroundColor: "#fff",
+    borderWidth: 1,
+    borderColor: "#ccc",
+    borderRadius: 5,
+  },
+  productName: {
+    flex: 2,
+    textAlign: "left",
+  },
+  rate: {
+    flex: 1,
+    textAlign: "center",
+  },
+  quantityInput: {
+    flex: 1,
+    textAlign: "center",
+    borderWidth: 1,
+    borderColor: "#ccc",
+    borderRadius: 5,
+    height: 35,
+    paddingHorizontal: 5,
+  },
+  totalAmount: {
+    flex: 1,
+    textAlign: "center",
+    fontWeight: "bold",
+  },
+  summary: {
+    marginTop: 20,
+    padding: 10,
+    backgroundColor: "#fff",
+    borderWidth: 1,
+    borderColor: "#ccc",
+    borderRadius: 5,
+  },
+  summaryRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    marginBottom: 5,
+  },
+  summaryLabel: {
+    fontSize: 16,
+    fontWeight: "bold",
+  },
+  summaryValue: {
+    fontSize: 16,
+  },
+  submitButton: {
+    marginTop: 10,
+    backgroundColor: "#007BFF",
+    padding: 10,
+    borderRadius: 5,
+    alignItems: "center",
+  },
+  submitButtonText: {
+    color: "#fff",
+    fontWeight: "bold",
+  },
+  footer: {
+    marginTop: 20,
+    alignItems: "center",
+  },
+  footerText: {
+    fontSize: 14,
+    color: "#555",
+  },
 });
+
+export default Test;

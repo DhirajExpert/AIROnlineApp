@@ -1,8 +1,10 @@
 import React, { useEffect, useState, useRef } from "react";
-import { FlatList, StyleSheet, Text, View, TouchableOpacity, ActivityIndicator, Pressable } from "react-native";
+import { FlatList, StyleSheet, TextInput, Text, View, TouchableOpacity, ActivityIndicator, Pressable, Image, Modal } from "react-native";
 import { getFTSDigestView } from "../api/api";
 import { SafeAreaView } from "react-native-safe-area-context";
 import globalStyle from "../core/Style";
+// import { TextInput } from "react-native-paper";
+import { theme } from "../core/theme";
 import {
     useFonts, Signika_300Light,
     Signika_400Regular,
@@ -10,6 +12,12 @@ import {
     Signika_600SemiBold,
     Signika_700Bold,
 } from '@expo-google-fonts/signika';
+import { FontAwesome, Ionicons, MaterialIcons } from '@expo/vector-icons'
+import Background from "../components/Background";
+import AntDesign from '@expo/vector-icons/AntDesign';
+import CustomModal from '../components/CustomModal';
+
+
 
 export default function FreeTextSearchDetails({ route, navigation }) {
     const { searchword } = route.params;
@@ -22,21 +30,49 @@ export default function FreeTextSearchDetails({ route, navigation }) {
     const [offset, setOffset] = useState(0);
     const viewabilityConfig = useRef({ viewAreaCoveragePercentThreshold: 90 }).current; // To determine if an item is fully visible
     const [data, setData] = useState([]);
+    const [filterData, setFilterData] = useState({
+        //         benchStrenth: [],
+        //   caseResult: [],
+        //   courts: [],
+        //   decisionYear: [],
+        //   judges: [],
+        //   nominalApp: [],
+        //   nominalRes: [],
+    }
+    );
+    const [datavalue, setDatavalue] = useState([]);
     const onEndReachedCalledDuringMomentum = useRef(false);
-
+    const [isModalVisible, setModalVisible] = useState(false);
+    const [isSortModalVisible, setSortModalVisible] = useState(false);
+    const [backdata, setBackdata] = useState(null);
+    const [selectedOption, setSelectedOption] = useState("");
+    var courts;
 
     useEffect(() => {
         CourtDigestView();
     }, []);
 
+    const sortOptions = [
+        "Relevance",
+        "Heading A-Z",
+        "Heading Z-A",
+        "Party Name A-Z",
+        "Party Name Z-A",
+        "Court Name A-Z",
+        "Court Name Z-A",
+        "Date of decision (↑)",
+        "Date of decision (↓)",
+        "Coram (↑)",
+        "Coram (↓)",
+    ];
+
 
 
     const CourtDigestView = async () => {
-
         if (loading || !hasMore) return;
-
         setLoading(true);
         try {
+
             const response = await getFTSDigestView(searchword, 10, `${offset}`);
             console.log("getFTSDigestView", response);
 
@@ -47,6 +83,19 @@ export default function FreeTextSearchDetails({ route, navigation }) {
                     setResponseDigestView((prevData) => [...prevData, ...response.digestView]);
                     setData((prevData) => [...prevData, ...(response.digestView)]);
                     setOffset((prevOffset) => prevOffset + 10); // Increase offset by 10
+                    if (response.filter) {
+                        const updatedFilterData = {
+                            ...filterData,
+                            ...response.filter,
+                        };
+                        setFilterData(updatedFilterData);
+                        // console.log("Updated filterData:", updatedFilterData);
+                    } else {
+                        console.warn("Response filter is undefined or null");
+                    }
+
+
+
 
                     if (response.docCount < 10) {
                         setHasMore(false);
@@ -65,6 +114,9 @@ export default function FreeTextSearchDetails({ route, navigation }) {
         setLoading(false);
     }
 
+    useEffect(() => {
+        console.log("filterData updated:", filterData);
+    }, [filterData]);
 
     const toggleExpansion = (citationID, noteIndex) => {
         setExpandedNotes(prevState => ({
@@ -83,19 +135,89 @@ export default function FreeTextSearchDetails({ route, navigation }) {
     const onMomentumScrollEnd = () => {
         onEndReachedCalledDuringMomentum.current = false;
     };
+    const datavalueSet = new Set();
+    const renderData = ({ item }) => {
+        const dataKey = `${item.citationID}`;
+        if (!datavalueSet.has(dataKey)) {
+            datavalueSet.add(dataKey);
+            datavalue.push({ name: item.citationName, id: item.citationID });
+        }
+
+
+        return (
+            <View style={styles.item}>
+                <View style={{ flexDirection: 'row', justifyContent: 'space-between', }}>
+                    <Pressable onPress={() => CitationClick(item.citationName, item.citationID)}>
+                        <Text style={[styles.title, { maxWidth: '70%' }]} >{item.citationName}</Text>
+                    </Pressable>
+                    <Text style={[globalStyle.courts, { maxWidth: '100%' }]}>{item.courts}</Text>
+                </View>
+                {/* <Text style={globalStyle.judgeName}>HON'BLE JUDGE(S): {item.judgeName}</Text> */}
+                {/* <Text style={globalStyle.nominal}>{item.nominal}</Text> */}
+                {/* <Text style={styles.detail}>{item.topic}</Text> */}
+                {/* <Text style={globalStyle.combineDod}>{item.combineDod}</Text> */}
+                <FlatList
+                    data={item.shortNote}
+                    renderItem={({ item, index }) => renderShortNote({ item, index, citationID: item.citationID })}
+                    keyExtractor={(note, index) => index.toString()}
+                    onEndReached={onEndReached}
+                    onEndReachedThreshold={0.1}
+                    onMomentumScrollEnd={onMomentumScrollEnd}
+                    ListFooterComponent={
+                        loading ? <ActivityIndicator size="large" color="#0000ff" /> : null
+                    }
+                />
+                <View style={styles.headnoteStrip}>
+                    <View style={{ flexDirection: 'row', justifyContent: 'space-around', alignItems: 'center', }}>
+                        <Text style={styles.dodtextstyle}>{item.year_of_decision_digest}</Text>
+                        <Text style={styles.dodtextstyle}>{item.benchStrength_digest}</Text>
+                    </View>
+                    <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', }}>
+                        <TouchableOpacity style={styles.headnoteFilterButton} onPress={() => openBookmark()}>
+                            <Image source={require('../../assets/images/bookmark.png')} resizeMode="contain" style={{ width: 24, height: 24 }} />
+                        </TouchableOpacity>
+                        <TouchableOpacity style={styles.headnoteFilterButton} onPress={() => CitationClick(item.citationName, item.citationID)}>
+                            <Image source={require('../../assets/images/judgement_open.png')} resizeMode="contain" style={{ width: 24, height: 24 }} />
+                        </TouchableOpacity>
+
+                    </View>
+                </View>
+
+            </View>)
+    }
 
     const renderShortNote = ({ item, index, citationID }) => {
+
         const isExpanded = expandedNotes[`${citationID}-${index}`];
-        const lnoteText = isExpanded ? item.lnote : item.lnote.substring(0, 100) + '...';
+        // const lnoteText = isExpanded ? item.lnote : item.lnote.substring(0, 100) + '...';
+
+
+
+        const getFirst150Words = (text) => {
+            if (!text) return '';
+            const words = text.split(' '); // Split text by spaces
+            return words.length > 50 ? words.slice(0, 50).join(' ') + '...' : text;
+        };
+
+        const snoteText = isExpanded ? item.snote : getFirst150Words(item.snote); // Truncated or full heads note
+        const lnoteText = isExpanded ? item.lnote : getFirst150Words(item.lnote); // Truncated or full lnote
+
         return (
             <View style={globalStyle.noteContainer}>
 
                 {/* <Text style={globalStyle.noteText}>{item.snote}</Text> */}
-                {highlightText(item.snote, searchword)}
+                {highlightText(snoteText, searchword)}
                 {isExpanded &&
                     // <Text style={globalStyle.noteLText}>{item.lnote}</Text>
-                    highlightText(item.lnote, searchword)
+                    highlightText(lnoteText, searchword)
                 }
+                {/* {item.snote && (
+                    <TouchableOpacity onPress={() => toggleExpansion(citationID, index)}>
+                        <Text style={globalStyle.showMoreText}>
+                            {isExpanded ? 'Show Less' : 'Show More'}
+                        </Text>
+                    </TouchableOpacity>
+                )} */}
 
                 {item.lnote && (
                     <TouchableOpacity onPress={() => toggleExpansion(citationID, index)}>
@@ -106,6 +228,7 @@ export default function FreeTextSearchDetails({ route, navigation }) {
                 )}
             </View>
         );
+        // Nrc@20681
     };
     const CitationClick = (citationName, citationID) => {
         console.log("Citation Click", citationName + citationID);
@@ -113,6 +236,7 @@ export default function FreeTextSearchDetails({ route, navigation }) {
         navigation.navigate('Judgement', {
             citationID: citationID,
             citationName: citationName,
+            datavalue: datavalue
         }
         )
     }
@@ -140,56 +264,221 @@ export default function FreeTextSearchDetails({ route, navigation }) {
             </Text>
         );
     };
-    return (
-        <SafeAreaView edges={['left', 'right', 'bottom']} style={globalStyle.safearea}>
-            <View style={styles.container}>
-                <FlatList
-                    data={data}
-                    renderItem={({ item }) =>
-                    (
-                        <View style={styles.item}>
-                            <Pressable onPress={() => CitationClick(item.citationName, item.citationID)}>
-                                <Text style={styles.title} >{item.citationName}</Text>
-                            </Pressable>
-                            <Text style={globalStyle.courts}>{item.courts}</Text>
-                            <Text style={globalStyle.judgeName}>HON'BLE JUDGE(S): {item.judgeName}</Text>
-                            <Text style={globalStyle.nominal}>{item.nominal}</Text>
-                            {/* <Text style={styles.detail}>{item.topic}</Text> */}
-                            <Text style={globalStyle.combineDod}>{item.combineDod}</Text>
-                            <FlatList
-                                data={item.shortNote}
-                                renderItem={({ item, index }) => renderShortNote({ item, index, citationID: item.citationID })}
-                                keyExtractor={(note, index) => index.toString()}
-                                onEndReached={onEndReached}
-                                onEndReachedThreshold={0.1}
-                                onMomentumScrollEnd={onMomentumScrollEnd}
-                                ListFooterComponent={
-                                    loading ? <ActivityIndicator size="large" color="#0000ff" /> : null
-                                }
+    const openBookmark = () => {
+        console.log("bookmark");
+    }
+    const filterCompClick = () => {
+        setModalVisible(true);
+        setData([]);
+        setPage(0);
 
-                            />
-                        </View>)
+    }
+    const filterSortClick = () => {
+
+    }
+    const filteriButton = () => {
+
+    }
+
+    const handleModalClose = (data) => {
+        // setSelectedData(data); // Update the state with data from the modal
+        console.log("return modal data", data);
+        setBackdata(data);
+        setModalVisible(false);
+    };
+    useEffect(() => {
+        if (backdata) {
+            console.log("backdata is called", backdata);
+            CourtFilterDigestView(backdata.courts, backdata.judges, backdata.benchStrength, backdata.Case_Results, backdata.Decision_Years, backdata.Nominal, backdata.nominalRes, backdata.topics,backdata.Act,backdata.Section)
+        }
+    }, [backdata]);
+
+
+    const CourtFilterDigestView = async (courts, judges, benchStrength, Case_Results, Decision_Years, Nominal, nominalRes, topics,acts,section, searchInSearch) => {
+        if (loading) return;
+        setLoading(true);
+        try {
+
+            const searchFilter = 'searchFilter';
+            const response = await getFTSDigestView(searchword, 10, `${page}`, courts, judges, benchStrength, Case_Results, Decision_Years, Nominal, nominalRes, topics,acts,section, searchFilter, searchInSearch);
+            console.log("getFTSDigestView", response);
+
+            if (response.err_code === 'success') {
+                console.log("count", response.docCount);
+
+                if (response.docCount > 0) {
+                    setResponseDigestView((prevData) => [...prevData, ...response.digestView]);
+                    setData((prevData) => [...prevData, ...(response.digestView)]);
+                    setPage((prevPage) => prevPage + 10);
+                    setFilterData((prevFilterData) => ({ ...prevFilterData, ...response.filter }));
+                    if (response.docCount < 10) {
+                        setHasMore(false);
                     }
-                    keyExtractor={item => item.citationID}
+                } else {
+                    setHasMore(false);
+                }
+            }
+            else if (response.err_code === 'ERR_01') {
+                setData([]);
+                setResponseDigestView([]);
+                setHasMore(false);
+            }
+            else {
+
+                setHasMore(false);
+            }
+        }
+        catch (error) {
+            console.error(error);
+        }
+        setLoading(false);
+    }
+    const HandleSelect = (event) => {
+        if ((event.nativeEvent.text).length < 3) {
+            Alert.alert("please search more than 3 characters");
+        }
+        else {
+
+            if (!backdata) {
+                console.log("data not found");
+                setData([]);
+                setPage(0);
+                CourtFilterDigestView('', '', '', '', '', '', '', '', event.nativeEvent.text)
+            }
+            else {
+                CourtFilterDigestView(backdata.courts, backdata.judges, backdata.benchStrength, backdata.Case_Results, backdata.Decision_Years, backdata.Nominal, backdata.nominalRes, backdata.topics,backdata.Act, event.nativeEvent.text)
+            }
+        }
+
+    }
+    const handleRadioClick=(item)=>{
+
+         setSelectedOption(item);
+         setSortModalVisible(false);
+    }
+
+    return (
+
+        <SafeAreaView edges={['left', 'right', 'bottom']} style={globalStyle.safearea}>
+            <Background>
+                <View style={styles.searchWithinStrip}>
+                    <Text style={{ color: "#FFFFFF", fontWeight: 'bold' }}>Search within results</Text>
+                    <View style={{ flexDirection: 'row', justifyContent: 'space-between', }}>
+                        <TouchableOpacity style={styles.filterButton} onPress={filteriButton}>
+                            <AntDesign name="infocirlceo" size={20} color={theme.colors.white} />
+                        </TouchableOpacity>
+                        <TouchableOpacity style={styles.filterButton} onPress={() => setSortModalVisible(true)}>
+                            <FontAwesome name="sort-amount-desc" size={20} color={theme.colors.white} />
+                        </TouchableOpacity>
+
+                        <Modal
+                            transparent={true}
+                            visible={isSortModalVisible}
+                            animationType="slide"
+                            onRequestClose={() => setSortModalVisible(false)}
+                        >
+                            <View style={styles.modalOverlay}>
+                                <View style={styles.modalContent}>
+                                    {/* Header */}
+                                    <View style={styles.modalHeader}>
+                                        <Text style={styles.modalTitle}>Sort Result</Text>
+                                        <TouchableOpacity onPress={() => setSortModalVisible(false)}>
+                                            <Ionicons name="close" size={24} color={theme.colors.white} />
+                                        </TouchableOpacity>
+                                    </View>
+
+                                    {/* Sort Options */}
+                                    <FlatList
+                                        data={sortOptions}
+                                        keyExtractor={(item, index) => index.toString()}
+                                        renderItem={({ item }) => (
+                                            <TouchableOpacity style={styles.option}
+                                            onPress={()=>handleRadioClick(item)}
+                                            >
+                                                {/* Radio Button */}
+                                                <View style={styles.radioButtonContainer}>
+                                                    <View
+                                                        style={[
+                                                            styles.radioButton,
+                                                            selectedOption === item && styles.radioButtonSelected,
+                                                        ]}
+                                                    />
+                                                </View>
+                                                <Text style={styles.optionText}>{item}</Text>
+                                            </TouchableOpacity>
+                                        )}
+                                    />
+                                </View>
+                            </View>
+                        </Modal>
+                        <TouchableOpacity style={styles.filterButton} onPress={filterCompClick}>
+                            <FontAwesome name="filter" size={20} color={theme.colors.white} />
+                        </TouchableOpacity>
+                    </View>
+                </View>
+                <View style={styles.container}>
+                    <View style={styles.searchBarContainer}>
+                        <FontAwesome name="search" size={20} color={theme.colors.red} style={styles.searchBarIcon} />
+                        <TextInput
+                            style={styles.searchBarInput}
+                            placeholder="Enter text to search"
+                            returnKeyType="search"
+                            onSubmitEditing={(value) => HandleSelect(value)}
+                        // placeholderTextColor="#A9A9A9"
+                        />
+                        <View style={styles.searchBarIconContainer}>
+                            <TouchableOpacity>
+                                <MaterialIcons name="mic" size={20} color={theme.colors.blue} />
+                            </TouchableOpacity>
+                            <TouchableOpacity>
+                                <MaterialIcons name="history" size={20} color={theme.colors.blue} />
+                            </TouchableOpacity>
+                        </View>
+                    </View>
+
+                    <FlatList
+                        data={data}
+                        renderItem={({ item }) => renderData({ item })
+
+                        }
+                        keyExtractor={item => item.citationID}
+                    />
+                </View>
+                <CustomModal
+                    visible={isModalVisible}
+                    onClose={handleModalClose}
+                    data={{ ...(filterData || {}), searchword }}
                 />
-            </View>
+
+
+
+            </Background>
         </SafeAreaView>
     );
 }
 const styles = StyleSheet.create({
+    container: {
+        paddingHorizontal: 20
+    },
 
     item: {
-        backgroundColor: '#d9dedb',
+        backgroundColor: '#ffffff',
         padding: 15,
-        marginVertical: 8,
+        marginVertical: 5,
         borderRadius: 8,
-        borderColor: '#ddd',
-        borderWidth: 1
+        borderColor: '#d9d9d9',
+        borderWidth: 1,
+        // shadowColor:'#d9d9d9',
+        // shadowOffset: { width: 0, height: 1 },
+        // shadowOpacity: 0.2,
+        // shadowRadius: 3,
+        // elevation: 2,
     },
     title: {
-        fontSize: 18,
-        fontWeight: 'bold',
-        color: 'blue'
+        fontSize: 14,
+        fontWeight: '700',
+        // color: 'blue',
+        color: theme.colors.blue
     },
 
     highlight: {
@@ -240,6 +529,131 @@ const styles = StyleSheet.create({
         marginTop: 8,
         borderRadius: 4
     },
+    searchWithinStrip: {
+        flexDirection: "row",
+        alignItems: 'center',
+        justifyContent: "space-between",
+        padding: 5,
+        backgroundColor: '#022555',
+        paddingHorizontal: '8%',
+        marginVertical: 10
+    },
+    headnoteStrip: {
+        flexDirection: "row",
+        alignItems: 'center',
+        justifyContent: "space-between",
+        // padding: 5,
+
+    },
+    Strip: {
+        flexDirection: "row",
+        alignItems: 'center',
+        justifyContent: "flex-end",
+        padding: 5,
+        backgroundColor: '#022555',
+        paddingHorizontal: '8%'
+    },
+    filterButton: {
+        paddingHorizontal: 6
+    },
+    headnoteFilterButton: {
+        paddingHorizontal: 6
+    },
+    searchBarContainer: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        backgroundColor: '#FFFFFF',
+        borderRadius: 5,
+        paddingHorizontal: 10,
+        paddingVertical: 10,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 1 },
+        shadowOpacity: 0.2,
+        shadowRadius: 3,
+        elevation: 2,
+        marginVertical: 10
+    },
+    searchBarIcon: {
+        marginRight: 10,
+    },
+    searchBarInput: {
+        flex: 1,
+        fontSize: 16,
+        color: '#333',
+    },
+    searchBarIconContainer: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        marginLeft: 10,
+    },
+    dodtextstyle: {
+        backgroundColor: '#F0F0F0',
+        padding: 8,
+        margin: 5,
+        borderWidth: 1,
+        borderColor: '#ccc',
+        borderRadius: 5,
+        color: theme.colors.darkgray
+    },
+    modalOverlay: {
+        flex: 1,
+        backgroundColor: "rgba(0, 0, 0, 0.5)",
+        justifyContent: "flex-start",
+        alignItems: "flex-end",
+        paddingVertical: '35%'
+    },
+    modalContent: {
+        width: "80%",
+        height: '95%',
+
+        backgroundColor: theme.colors.blue,
+        borderRadius: 10,
+        padding: 16,
+        elevation: 5,
+    },
+    modalHeader: {
+        flexDirection: "row",
+        justifyContent: "space-between",
+        alignItems: "center",
+        marginBottom: 16,
+    },
+    modalTitle: {
+        fontSize: 18,
+        fontWeight: "bold",
+        color:theme.colors.white
+    },
+    option: {
+        flexDirection: "row",
+        alignItems: "center",
+        
+        paddingVertical: '4%',
+        // borderBottomWidth: 1,
+        // borderBottomColor: "#eee",
+      },
+    optionText: {
+        fontSize: 16,
+        paddingHorizontal:'5%',
+        color:theme.colors.white,
+        fontWeight:'600'
+    },
+    radioButtonContainer: {
+        height: 20,
+        width: 20,
+        borderRadius: 10,
+        borderWidth: 2,
+        borderColor: theme.colors.white,
+        justifyContent: "center",
+        alignItems: "center",
+      },
+      radioButton: {
+        height: 10,
+        width: 10,
+        borderRadius: 5,
+        backgroundColor: "transparent",
+      },
+      radioButtonSelected: {
+        backgroundColor: theme.colors.white,
+      },
 
 
 });

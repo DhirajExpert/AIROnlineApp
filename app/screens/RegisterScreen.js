@@ -13,6 +13,8 @@ import { emailValidator } from "../helpers/emailValidator";
 import { passwordValidator } from "../helpers/passwordValidator";
 import { nameValidator } from "../helpers/nameValidator";
 import { ProgressSteps, ProgressStep } from 'react-native-progress-steps';
+import { verifyUser, registerUser } from '../api/api';
+import { SafeAreaView } from 'react-native-safe-area-context'
 
 
 
@@ -26,6 +28,12 @@ export default function RegisterScreen({ navigation }) {
   const [promoCode, setPromoCode] = useState({ value: "", error: "" });
   const [seCode, setSECode] = useState({ value: "", error: "" });
 
+  const [couponserialno, setCouponSerialNo] = useState({ value: "", error: "" });
+  const [couponcode, setCouponCode] = useState({ value: "", error: "" });
+
+  couponserialno
+  couponcode
+
   const [callingCode, setCallingCode] = useState("91");
 
   const [step, setStep] = useState(0);
@@ -34,44 +42,68 @@ export default function RegisterScreen({ navigation }) {
 
   const onNextStep1 = () => {
     if (validateStep1()) {
-      setStep(1); // Proceed to the next step
+      setStep(step + 1); // Proceed to the next step
     }
+    setStep(step + 1);
   };
+  // const validateStep1 = () => {
+  //   let isValid = true;
+
+  //   if (!name.value.trim()) {
+  //     setName({ ...name, error: "Username is required!" });
+  //     isValid = false;
+  //   }
+
+  //   if (!password.value.trim()) {
+  //     setPassword({ ...password, error: "Password is required!" });
+  //     isValid = false;
+  //   } else if (password.value.length < 6) {
+  //     setPassword({ ...password, error: "Password must be at least 6 characters!" });
+  //     isValid = false;
+  //   }
+
+  //   const emailRegex = /^\S+@\S+\.\S+$/;
+  //   if (!email.value.trim()) {
+  //     setEmail({ ...email, error: "Email is required!" });
+  //     isValid = false;
+  //   } else if (!emailRegex.test(email.value)) {
+  //     setEmail({ ...email, error: "Invalid email format!" });
+  //     isValid = false;
+  //   }
+
+  //   if (!mobno.value.trim()) {
+  //     setMobNo({ ...mobno, error: "Mobile number is required!" });
+  //     isValid = false;
+  //   } else if (!/^\d{10}$/.test(mobno.value)) {
+  //     setMobNo({ ...mobno, error: "Invalid mobile number!" });
+  //     isValid = false;
+  //   }
+
+  //   if (!fullname.value.trim()) {
+  //     setFullName({ ...fullname, error: "Full name is required!" });
+  //     isValid = false;
+  //   }
+
+  //   return isValid;
+  // };
+
+
   const validateStep1 = () => {
     let isValid = true;
 
-    if (!name.value.trim()) {
-      setName({ ...name, error: "Username is required!" });
+    // Validate Name
+    if (name.value.trim() === "") {
+      setName({ ...name, error: "Name is required." });
       isValid = false;
     }
 
-    if (!password.value.trim()) {
-      setPassword({ ...password, error: "Password is required!" });
+    // Validate Email
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/; // Simple email regex
+    if (email.value.trim() === "") {
+      setEmail({ ...email, error: "Email is required." });
       isValid = false;
-    } else if (password.value.length < 6) {
-      setPassword({ ...password, error: "Password must be at least 6 characters!" });
-      isValid = false;
-    }
-
-    const emailRegex = /^\S+@\S+\.\S+$/;
-    if (!email.value.trim()) {
-      setEmail({ ...email, error: "Email is required!" });
-      isValid = false;
-    } else if (!emailRegex.test(email.value)) {
-      setEmail({ ...email, error: "Invalid email format!" });
-      isValid = false;
-    }
-
-    if (!mobno.value.trim()) {
-      setMobNo({ ...mobno, error: "Mobile number is required!" });
-      isValid = false;
-    } else if (!/^\d{10}$/.test(mobno.value)) {
-      setMobNo({ ...mobno, error: "Invalid mobile number!" });
-      isValid = false;
-    }
-
-    if (!fullname.value.trim()) {
-      setFullName({ ...fullname, error: "Full name is required!" });
+    } else if (!emailRegex.test(email.value.trim())) {
+      setEmail({ ...email, error: "Enter a valid email address." });
       isValid = false;
     }
 
@@ -80,10 +112,10 @@ export default function RegisterScreen({ navigation }) {
   const onNextStep = () => {
 
     setStep(step + 1);
-    
+
   };
 
-  const validateFields= ()=>{
+  const validateFields = () => {
     const nameError = nameValidator(name.value);
     const emailError = emailValidator(email.value);
     const passwordError = passwordValidator(password.value);
@@ -94,8 +126,8 @@ export default function RegisterScreen({ navigation }) {
       return false;
     }
     return true;
-      // setStep(step + 1);
-    
+    // setStep(step + 1);
+
 
   }
 
@@ -106,43 +138,110 @@ export default function RegisterScreen({ navigation }) {
     Linking.openURL('https://www.aironline.in/terms-and-conditions.html');
   };
 
-  const onSignUpPressed = () => {
-    
+  const onSignUpPressed = async () => {
+
     // navigation.reset({
     //   index: 0,
     //   routes: [{ name: "HomeScreen" }],
     // });
 
 
-    if(value==='1'){
+    if (value === '1') {
       console.log("1");
-    }else{
+    } else {
       console.log("2");
     }
     if (checked) {
       console.log("Submit Button clicked");
+
+      const response = await registerUser(name.value, email.value, mobno.value, password.value, fullname.value, value, couponserialno.value, couponcode.value, checked);
+      console.log("Register User", response);
+
+
+      if (response.success) {     
+       Alert.alert("User Successfully Registered...!")
+      } else {
+        Alert.alert(response.error)
+      }
+
     } else {
       Alert.alert("Please check i agree...")
     }
 
   };
 
+  const checkUsernameAvailability = async () => {
 
+
+    const response = await verifyUser(name.value, email.value, mobno.value);
+    console.log("verifyuser", response);
+
+    if (response.success) {     
+      setName((prev) => ({ ...prev, error: "" }));
+    } else {
+      setName((prev) => ({ ...prev, error: "Username is already taken" }));
+    }
+  };
+
+  const checkEmailAvailability = async () => {
+    const response = await verifyUser(name.value, email.value, mobno.value);
+    console.log("verifyuser", response);
+
+    if (response.success) {     
+      setEmail((prev) => ({ ...prev, error: "" }));
+    } else {
+      setEmail((prev) => ({ ...prev, error: "Email id is already taken" }));
+    }
+  }
+  const checkMobileAvailability = async () => {
+    const response = await verifyUser(name.value, email.value, mobno.value);
+    console.log("verifyuser", response);
+
+    if (response.success) {     
+      setMobNo((prev) => ({ ...prev, error: "" }));
+    } else {
+      setMobNo((prev) => ({ ...prev, error: "Mobile no is already taken" }));
+    }
+  }
+
+  const [isValid, setIsValid] = useState(false);
+  const [errors, setErrors] = useState(false);
+
+  const onNextStepprogress = () => {
+
+    if (validateStep1()) {
+      console.log("Validate data")
+      setErrors(false);
+    } else {
+      console.log("In Validate data")
+      setErrors(true);
+    }
+    // if (!isValid) {
+    //   setErrors(true); // Show errors if not valid
+    // } else {
+    //   setErrors(false); // Clear errors if valid
+    // }
+  };
 
   return (
-    <Background>
+    // <Background>
+    <SafeAreaView edges={['left', 'right', 'bottom']} style={styles.safeArea}>
       <View style={styles.container}>
-        <ProgressSteps step={step}>
+        <ProgressSteps activeStep={step}>
           <ProgressStep
             label="Login Info"
-            onNext={onNextStep1}
+            // errors={!validateStep1()}
+            // onNext={onNextStep1}
+            onNext={onNextStepprogress}
+            errors={errors}
             onPrevious={onPreviousStep}
             nextBtnText="Next"
             previousBtnText="Previous"
-            removeBtnRow={false} 
+            removeBtnRow={false}
+
           >
             <View style={styles.stepContent}>
-            
+
               <TextInput
                 label="Desire Username"
                 returnKeyType="next"
@@ -150,6 +249,7 @@ export default function RegisterScreen({ navigation }) {
                 onChangeText={(text) => setName({ value: text, error: "" })}
                 error={!!name.error}
                 errorText={name.error}
+                onBlur={checkUsernameAvailability}
               />
               <TextInput
                 label="Password"
@@ -171,6 +271,7 @@ export default function RegisterScreen({ navigation }) {
                 autoCompleteType="email"
                 textContentType="emailAddress"
                 keyboardType="email-address"
+                onBlur={checkEmailAvailability}
               />
               <TextInput
                 label="Mobile No."
@@ -179,6 +280,7 @@ export default function RegisterScreen({ navigation }) {
                 onChangeText={(text) => setMobNo({ value: text, error: "" })}
                 error={!!mobno.error}
                 errorText={mobno.error}
+                onBlur={checkMobileAvailability}
               />
               <TextInput
                 label="Full Name"
@@ -189,10 +291,10 @@ export default function RegisterScreen({ navigation }) {
                 errorText={fullname.error}
               />
 
-              
+
             </View>
           </ProgressStep>
-          <ProgressStep
+          {/* <ProgressStep
             label="Promo Code"
             onNext={onNextStep}
             onPrevious={onPreviousStep}
@@ -217,12 +319,13 @@ export default function RegisterScreen({ navigation }) {
                 errorText={seCode.error}
               />
             </View>
-          </ProgressStep>
+          </ProgressStep> */}
           <ProgressStep
             label="AGREEMENT"
-           
+
             finishBtnText="Submit"
             onSubmit={onSignUpPressed}
+            // previousBtnText="Previous"
             finishBtnStyle={styles.button}
             finishBtnTextStyle={styles.buttonText}
           >
@@ -263,18 +366,18 @@ export default function RegisterScreen({ navigation }) {
                 <TextInput
                   label="Coupon Serial Number"
                   returnKeyType="next"
-                  value={promoCode.value}
-                  onChangeText={(text) => setPromoCode({ value: text, error: "" })}
-                  error={!!promoCode.error}
-                  errorText={promoCode.error}
+                  value={couponserialno.value}
+                  onChangeText={(text) => setCouponSerialNo({ value: text, error: "" })}
+                  error={!!couponserialno.error}
+                  errorText={couponserialno.error}
                 />
                 <TextInput
                   label="Coupon Code"
                   returnKeyType="next"
-                  value={seCode.value}
-                  onChangeText={(text) => setSECode({ value: text, error: "" })}
-                  error={!!seCode.error}
-                  errorText={seCode.error}
+                  value={couponcode.value}
+                  onChangeText={(text) => setCouponCode({ value: text, error: "" })}
+                  error={!!couponcode.error}
+                  errorText={couponcode.error}
                 />
               </View>
               : (null)}
@@ -297,9 +400,9 @@ export default function RegisterScreen({ navigation }) {
           </ProgressStep>
         </ProgressSteps>
       </View>
+    </SafeAreaView>
 
-
-    </Background>
+    // </Background>
   );
 }
 
@@ -307,6 +410,10 @@ const styles = StyleSheet.create({
   row: {
     flexDirection: "row",
     marginTop: 4,
+  },
+  safeArea: {
+    flex: 1,
+    paddingHorizontal: 20,
   },
   link: {
     fontWeight: "bold",

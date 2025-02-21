@@ -11,7 +11,7 @@ export default function Background({ children }) {
   return (
     <ImageBackground
       source={require("../../assets/items/dot.png")}
-      resizeMode="repeat"
+      // resizeMode="repeat"
       style={styles.background}
     >
       <KeyboardAvoidingView style={styles.container} behavior="padding">
@@ -29,11 +29,11 @@ const styles = StyleSheet.create({
   },
   container: {
     flex: 1,
-    padding: 20,
+    // padding: 20,
     width: "100%",
-    maxWidth: 340,
-    alignSelf: "center",
-    alignItems: "center",
-    justifyContent: "center",
+    // maxWidth: 340,
+    // alignSelf: "center",
+    // alignItems: "center",
+    // justifyContent: "center",
   },
 });

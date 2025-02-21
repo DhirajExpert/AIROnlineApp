@@ -1,0 +1,758 @@
+import React, { useState, useEffect } from 'react';
+import {
+  View, Text, Modal, FlatList, TouchableOpacity, StyleSheet, TextInput, ScrollView,
+} from 'react-native';
+import { Button, RadioButton, Checkbox } from 'react-native-paper';
+import {theme} from "../core/theme";
+import { getFTSDigestView } from "../api/api";
+
+
+
+// const filter = {
+//   "courts": [
+//     {
+//       "name": "bombay high court",
+//       "count": 1
+//     },
+//     {
+//       "name": "patna high court",
+//       "count": 1
+//     },
+//     {
+//       "name": "supreme court",
+//       "count": 2
+//     },
+//     {
+//       "name": "uttarakhand high court",
+//       "count": 1
+//     }
+//   ],
+//   "judges": [
+//     {
+//       "name": "ahsanuddin amanullah",
+//       "count": 1
+//     },
+//     {
+//       "name": "ashwani kumar singh",
+//       "count": 1
+//     },
+//     {
+//       "name": "chakradhari sharan singh",
+//       "count": 1
+//     },
+//     {
+//       "name": "hemant gupta",
+//       "count": 1
+//     },
+//     {
+//       "name": "indu malhotra",
+//       "count": 1
+//     },
+//     {
+//       "name": "j.j. heaton",
+//       "count": 1
+//     },
+//     {
+//       "name": "krishna murari",
+//       "count": 1
+//     },
+//     {
+//       "name": "l.c. crump",
+//       "count": 1
+//     },
+//     {
+//       "name": "lallubhai asharam shah",
+//       "count": 1
+//     },
+//     {
+//       "name": "manoj kumar tiwari",
+//       "count": 1
+//     },
+//     {
+//       "name": "n. v. ramana",
+//       "count": 1
+//     },
+//     {
+//       "name": "rajendra kumar mishra",
+//       "count": 1
+//     },
+//     {
+//       "name": "ravindra maithani",
+//       "count": 1
+//     },
+//     {
+//       "name": "surya kant",
+//       "count": 1
+//     },
+//     {
+//       "name": "uday umesh lalit",
+//       "count": 1
+//     },
+//     {
+//       "name": "vikash jain",
+//       "count": 1
+//     },
+//     {
+//       "name": "vipin sanghi",
+//       "count": 1
+//     }
+//   ],
+//   "benchStrenth": [
+//     {
+//       "name": "3",
+//       "count": 4
+//     },
+//     {
+//       "name": "5",
+//       "count": 1
+//     }
+//   ],
+//   "topic": [
+//     {
+//       "name": "adulteration in turmeric powder",
+//       "count": 1
+//     },
+//     {
+//       "name": "criminal laws  (offences & punishment)",
+//       "count": 1
+//     },
+//     {
+//       "name": "mandi fees tecovered from purchaser",
+//       "count": 1
+//     },
+//     {
+//       "name": "report of public analyst",
+//       "count": 1
+//     },
+//     {
+//       "name": "sale price",
+//       "count": 1
+//     },
+//     {
+//       "name": "trusts",
+//       "count": 1
+//     },
+//     {
+//       "name": "validity",
+//       "count": 1
+//     },
+//     {
+//       "name": "value added tax",
+//       "count": 1
+//     },
+//     {
+//       "name": "waqf board",
+//       "count": 1
+//     }
+//   ],
+//   "remark": [
+//     {
+//       "name": "overruled",
+//       "count": 1
+//     },
+//     {
+//       "name": "reversed",
+//       "count": 1
+//     }
+//   ],
+//   "nominalApp": [
+//     {
+//       "name": "hargovind pulchand doshi",
+//       "count": 1
+//     },
+//     {
+//       "name": "prabhagiya vipnan prabandhak uttarakhand forest development ramnagar",
+//       "count": 1
+//     },
+//     {
+//       "name": "prem chand",
+//       "count": 1
+//     },
+//     {
+//       "name": "smriti madan kansagra",
+//       "count": 1
+//     },
+//     {
+//       "name": "suo motu cognizance",
+//       "count": 1
+//     }
+//   ],
+//   "nominalRes": [
+//     {
+//       "name": "bai hirbai",
+//       "count": 1
+//     },
+//     {
+//       "name": "commissioner commercial tax uttarakhand, dehradun",
+//       "count": 1
+//     },
+//     {
+//       "name": "perry kansagra",
+//       "count": 1
+//     },
+//     {
+//       "name": "state of bihar",
+//       "count": 1
+//     },
+//     {
+//       "name": "state of haryana",
+//       "count": 1
+//     }
+//   ],
+//   "caseResult": [
+//     {
+//       "name": "appeal allowed",
+//       "count": 1
+//     },
+//     {
+//       "name": "appeal dismissed",
+//       "count": 1
+//     },
+//     {
+//       "name": "order accordingly",
+//       "count": 1
+//     },
+//     {
+//       "name": "order accordingly.",
+//       "count": 1
+//     },
+//     {
+//       "name": "petition dismissed",
+//       "count": 1
+//     }
+//   ],
+//   "decisionYear": [
+//     {
+//       "name": "1920",
+//       "count": 1
+//     },
+//     {
+//       "name": "2020",
+//       "count": 2
+//     },
+//     {
+//       "name": "2021",
+//       "count": 1
+//     },
+//     {
+//       "name": "2023",
+//       "count": 1
+//     }
+//   ]
+// }
+
+
+// const filter = {"benchStrenth": [{"count": 4, "name": "1"}, {"count": 1, "name": "2"}, {"count": 1, "name": "13"}], "caseResult": [{"count": 1, "name": "cases remitted to constitution bench"}, {"count": 3, "name": "order accordingly"}, {"count": 1, "name": "petition allowed"}, {"count": 1, "name": "petition dismissed"}], "courts": [{"count": 2, "name": "bombay high court"}, {"count": 1, "name": "madras high court"}, {"count": 1, "name": "manipur high court"}, {"count": 1, "name": "meghalaya high court"}, {"count": 1, "name": "supreme court of india"}], "decisionYear": [{"count": 1, "name": "24"}, {"count": 2, "name": "1999"}, {"count": 1, "name": "2021"}, {"count": 2, "name": "2022"}], "judges": [{"count": 1, "name": "a. k. mukherjea"}, {"count": 1, "name": "a. n. grover"}, {"count": 1, "name": "a. n. ray"}, {"count": 1, "name": "d. d. sinha"}, {"count": 1, "name": "d. g. palekar"}, {"count": 1, "name": "dipankar datta"}, {"count": 1, "name": "h. r. khanna"}, {"count": 1, "name": "j. m. shelat"}, {"count": 1, "name": "k. govindarajan"}, {"count": 1, "name": "k. k. mathew"}, {"count": 1, "name": "k. s. hegde"}, {"count": 1, "name": "m. h. beg"}, {"count": 1, "name": "m. s. sonak"}, {"count": 1, "name": "m. sikri"}, {"count": 1, "name": "p. jaganmohan reddy"}, {"count": 1, "name": "s. n. dwivedi"}, {"count": 1, "name": "sanjay kumar"}, {"count": 1, "name": "sanjib banerjee"}, {"count": 1, "name": "y. v. chandrachud"}], "nominalApp": [{"count": 1, "name": "gopal damduji shelwatkar"}, {"count": 1, "name": "his holiness kesavananda bharati sripadgalvaru and others"}, {"count": 1, "name": "m/s. maya construction"}, {"count": 1, "name": "rathinam chettiar"}, {"count": 1, "name": "raviraj bandodkar"}, {"count": 1, "name": "salam robindro singh"}], "nominalRes": [{"count": 1, "name": "embar naidu"}, {"count": 1, "name": "gramin uddhar society"}, {"count": 1, "name": "officer-in-charge, andro police station, manipur"}, {"count": 1, "name": "state of goa"}, {"count": 1, "name": "state of kerala and another"}, {"count": 1, "name": "union of india"}], "remark": [], "topic": [{"count": 1, "name": "municipalities"}, {"count": 1, "name": "service laws"}, {"count": 1, "name": "specific relief specific relief"}]}
+
+
+
+const CustomModal = ({ visible, onClose, handleModalDismiss, data }) => {
+
+// const [data, setData] = useState([]);
+ const [responseDigestView, setResponseDigestView] = useState([]);
+  const [page, setPage] = useState(0);
+  const [loading, setLoading] = useState(false);
+  const [staticData, setStaticData] = useState({});
+//   if(data || []){
+//   const [staticData, setStaticData] = useState({
+//     courts: data?.courts?.map(item => ({ name: item.name, count: item.count })) || [],
+//     judges: data?.judges?.map(item => ({ name: item.name, count: item.count })) || [],
+//     benchStrength: data?.benchStrength?.map(item => ({ name: item.name, count: item.count })) || [],
+//     topics: data?.topics?.map(item => ({ name: item.name, count: item.count })) || [],
+//     remarks: data?.remarks?.map(item => ({ name: item.name, count: item.count })) || [],
+//     Nominal: data?.Nominal?.map(item => ({ name: item.name, count: item.count })) || [],
+//     nominalRes: data?.nominalRes?.map(item => ({ name: item.name, count: item.count })) || [],
+//     Case_Results: data?.Case_Results?.map(item => ({ name: item.name, count: item.count })) || [],
+//     Decision_Years: data?.Decision_Years?.map(item => ({ name: item.name, count: item.count })) || [],
+//     Act: data?.acts?.map(item => ({ name: item.name, count: item.count })) || [],
+//   });
+// }
+// var staticData = '';
+// if(data || []){
+
+  
+//   setStaticData = {
+//     courts: data?.courts?.map(item => ({ name: item.name, count: item.count })),
+//     // courts: data?.courts.map(item => ({ name: item.name, count: item.count })),
+//     judges: data?.judges?.map(item => ({ name: item.name, count: item.count })),
+//     benchStrength: data?.benchStrenth?.map(item => ({ name: item.name, count: item.count })),
+//     topics: data?.topic?.map(item => ({ name: item.name, count: item.count })),
+//     remarks: data?.remark?.map(item => ({ name: item.name, count: item.count })), // remark is empty here
+//     Nominal: data?.nominalApp?.map(item => ({ name: item.name, count: item.count })),
+//     nominalRes: data?.nominalRes?.map(item => ({ name: item.name, count: item.count })),
+//     Case_Results: data?.caseResult?.map(item => ({ name: item.name, count: item.count })),
+//     Decision_Years: data?.decisionYear?.map(item => ({ name: item.name, count: item.count })),
+//     Act: data?.acts?.map(item => ({ name: item.name, count: item.count })),
+
+//   };
+// }
+
+useEffect(() => {
+  if (data) {
+    setStaticData({
+      courts: data?.courts?.map(item => ({ name: item.name, count: item.count })) || [],
+      judges: data?.judges?.map(item => ({ name: item.name, count: item.count })) || [],
+      benchStrength: data?.benchStrength?.map(item => ({ name: item.name, count: item.count })) || [],
+      topics: data?.topic?.map(item => ({ name: item.name, count: item.count })) || [],
+      remarks: data?.remark?.map(item => ({ name: item.name, count: item.count })) || [],
+      Nominal: data?.nominalApp?.map(item => ({ name: item.name, count: item.count })) || [],
+      nominalRes: data?.nominalRes?.map(item => ({ name: item.name, count: item.count })) || [],
+      Case_Results: data?.caseResult?.map(item => ({ name: item.name, count: item.count })) || [],
+      Decision_Years: data?.decisionYear?.map(item => ({ name: item.name, count: item.count })) || [],
+      Act: data?.acts?.map(item => ({ name: item.name, count: item.count })) || [],
+    });
+  }
+}, [data]);
+
+  const [filterData, setFilterData] = useState([]);
+
+
+  useEffect(() => {
+    const updatedFilter = updateFilterData(filterData, selectedItem);
+    setFilterData(updatedFilter);
+  }, [selectedItem]);
+
+
+  const initialCollapsedState = Object.keys(staticData).reduce((acc, category) => {
+    acc[category] = true;
+    return acc;
+  }, {});
+
+  const [collapsed, setCollapsed] = useState(initialCollapsedState);
+  const [selectedItem, setSelectedItem] = useState({});
+
+
+  const [modalVisible, setModalVisible] = useState(false);
+  const [currentCategory, setCurrentCategory] = useState([]);
+  const [currentCategoryKey, setCurrentCategoryKey] = useState("");
+
+  const toggleCollapse = (category) => {
+    setCollapsed((prev) => ({
+      ...prev,
+      [category]: !prev[category],
+    }));
+  };
+
+  const handleSelect = (category, name) => {
+    setSelectedItem((prev) => ({
+      ...prev,
+      [category]: name,
+    }));
+  };
+  const openModal = (key, items) => {
+    setCurrentCategory(items);
+    setCurrentCategoryKey(key);
+    setModalVisible(true);
+  };
+
+  const renderCategory = ({ item }) => {
+    const { categoryName, data } = item;
+    const isCollapsed = collapsed[categoryName];
+    const visibleItems = data.slice(0, 5);
+
+    return (
+      <View style={styles.categoryContainer}>
+        <TouchableOpacity
+          style={styles.categoryTitle}
+          onPress={() => toggleCollapse(categoryName)}
+        >
+          <Text style={styles.categoryText}>{categoryName}</Text>
+          <Text style={styles.arrow}>{isCollapsed ? "↓" : "↑"}</Text>
+        </TouchableOpacity>
+        {!isCollapsed && (
+          <>
+            <FlatList
+              data={visibleItems}
+              keyExtractor={(item, index) => `${item.name}-${index}`}
+              renderItem={({ item }) => (
+                <View style={styles.itemContainer}>
+                  {/* <RadioButton
+                    value={item.name}
+                    status={selectedItem[categoryName] === item.name ? "checked" : "unchecked"}
+                    onPress={() => handleSelect(categoryName, item.name)}
+                  /> */}
+                  <Checkbox
+                    status={
+                      selectedItem[categoryName]?.[item.name]
+                        ? "checked" : "unchecked"
+                    }
+                    containerStyle={{
+                      backgroundColor: "transparent",
+                      borderWidth: 0,
+                    }}
+                    textStyle={{
+                      fontSize: 16,
+                    }}
+                    checkedColor="#007BFF"
+                    uncheckedColor="#C0C0C0"
+                    onPress={() => handleCheckboxToggle(categoryName, item.name)}
+                  />
+                  <Text>{item.name} ({item.count})</Text>
+                </View>
+              )}
+            />
+            {data.length > 5 && (
+              <TouchableOpacity
+                onPress={() => openModal(categoryName, data)}
+                style={styles.readMoreButton}
+              >
+                <Text style={styles.readMoreText}>Read More</Text>
+              </TouchableOpacity>
+            )}
+          </>
+        )}
+      </View>
+    );
+  };
+
+  const categories = Object.keys(staticData).map((key) => ({
+    categoryName: key,
+    data: staticData[key],
+  }));
+
+  const updateFilterData = (originalData, responseData) => {
+    const updatedData = {};
+
+    // Iterate over each category in the original data
+    Object.keys(originalData).forEach((key) => {
+      updatedData[key] = originalData[key].map((item) => ({
+        ...item,
+        checked: responseData[key]?.[item.name] || false, // Set checked based on response
+      }));
+    });
+    return updatedData;
+  };
+
+  const onSubmit = () => {
+    console.log("selected", selectedItem);
+
+    const updatedData = updateFilterData(staticData, selectedItem);
+    // console.log("New Updated Data", updatedData);
+    //  setVisible(false);
+    const transformedData = transformResponse(selectedItem);
+
+    console.log(transformedData);
+    onClose(transformedData);
+
+  }
+
+  const transformResponse = (response) => {
+    const transformedData = {};
+
+    // Iterate over each key in the response
+    Object.keys(response).forEach((key) => {
+      transformedData[key] = Object.keys(response[key]).filter((subKey) => response[key][subKey]);
+    });
+
+    return transformedData;
+  };
+
+  const handleCheckboxToggle = (category, name) => {
+    setSelectedItem((prev) => ({
+      ...prev,
+      [category]: {
+        ...(prev[category] || {}),
+        [name]: !(prev[category]?.[name] || false),
+      },
+    }));
+
+    if (category === "Act" && !selectedItem[category]?.[name]) {
+      console.log("ActNmae",name);
+     
+
+      const transformedData = transformResponse(selectedItem);
+      console.log("transformedData",transformedData);
+      CourtFilterDigestView(transformedData.courts||'', transformedData.judges||'', transformedData.benchStrength||'', transformedData.Case_Results||'', transformedData.Decision_Years||'', transformedData.Nominal||'', transformedData.nominalRes||'', transformedData.topics||'', name)
+    }
+
+
+
+
+
+    // setSelectedItem((prev) => {
+    //   const prevSelected = prev[category] || {}; // Get previous selections
+    //   const newSelection = !prevSelected[name]; // Toggle current selection
+  
+    //   const updatedSelection = {
+    //     ...prevSelected,
+    //     [name]: newSelection, // Update selected value
+    //   };
+  
+    //   const newSelectedItem = {
+    //     ...prev,
+    //     [category]: updatedSelection,
+    //   };
+  
+    //   // If the selected category is "Act", call the API
+    //   if (category === "Act") {
+    //     const previouslySelectedActs = Object.keys(prevSelected).filter(
+    //       (key) => prevSelected[key] // Get previously selected items
+    //     );
+  
+    //     const currentlySelectedActs = Object.keys(updatedSelection).filter(
+    //       (key) => updatedSelection[key]
+    //     );
+  
+    //     console.log("Previously Selected Acts:", previouslySelectedActs);
+    //     console.log("Currently Selected Acts:", currentlySelectedActs);
+        
+    //     // Call transformResponse and API with previous & current selected Acts
+    //     const transformedData = transformResponse(newSelectedItem);
+        
+
+    //     CourtFilterDigestView(transformedData.courts||'', transformedData.judges||'', transformedData.benchStrength||'', transformedData.Case_Results||'', transformedData.Decision_Years||'', transformedData.Nominal||'', transformedData.nominalRes||'', transformedData.topics||'', currentlySelectedActs)
+    //   }
+  
+    //   return newSelectedItem; // Update state
+    // });
+
+  };
+  const CourtFilterDigestView = async (courts, judges, benchStrength, Case_Results, Decision_Years, Nominal, nominalRes, topics,acts, searchInSearch) => {
+          // if (loading) return;
+          setLoading(true);
+          try {
+  
+              const searchFilter = 'searchFilter';
+              const response = await getFTSDigestView(data?.searchword||'', 10, `${page}`, courts, judges, benchStrength, Case_Results, Decision_Years, Nominal, nominalRes, topics,acts, searchFilter, searchInSearch||'');
+              console.log("getFTSDigestView section", response);
+  
+              if (response.err_code === 'success') {
+                  console.log("count", response.docCount);
+  
+                  if (response.docCount > 0) {
+                      setResponseDigestView((prevData) => [...prevData, ...response.digestView]);
+                      // setData((prevData) => [...prevData, ...(response.digestView)]);
+                      setPage((prevPage) => prevPage + 10);
+                      // setFilterData((prevFilterData) => ({ 
+                      
+                      //   ...prevFilterData,
+                      //   sections: data?.decisionYear?.map((item) => ({ name: item.name, count: item.count })),
+                      // }));
+
+
+                      setStaticData(prevData => ({
+                        ...prevData,
+                        Section: response?.filter?.sections?.map(item => ({ name: item.name, count: item.count })) || [],
+                      }));
+
+
+                      // if (response.docCount < 10) {
+                      //     setHasMore(false);
+                      // }
+                  } else {
+                      // setHasMore(false);
+                  }
+              }
+              else if (response.err_code === 'ERR_01') {
+                  // setData([]);
+                  setResponseDigestView([]);
+                  // setHasMore(false);
+              }
+              else {
+  
+                  // setHasMore(false);
+              }
+          }
+          catch (error) {
+              console.error(error);
+          }
+          setLoading(false);
+      }
+
+
+  return (
+    <Modal
+      animationType="slide"
+      transparent={true}
+      visible={visible}
+      onRequestClose={onClose} // Handle back button press on Android
+      onDismiss={handleModalDismiss}
+    >
+      <View style={styles.modalOverlay}>
+        <View style={styles.modalContent}>
+          <View >
+            <FlatList
+              data={categories}
+              keyExtractor={(item) => item.categoryName}
+              renderItem={renderCategory}
+            />
+
+            <Modal
+              visible={modalVisible}
+              animationType="slide"
+              onRequestClose={() => setModalVisible(false)}
+            >
+              <View style={styles.modalOverlay}>
+                <View style={styles.modalContent}>
+                  <View style={styles.modalContainer}>
+                    <Text style={styles.modalTitle}>{currentCategoryKey}</Text>
+                    <FlatList
+                      data={currentCategory}
+                      keyExtractor={(item, index) => `${item.name}-${index}`}
+                      renderItem={({ item }) => (
+                        <View style={styles.itemContainer}>
+                          {/* <RadioButton
+                        value={item.name}
+                        status={
+                          Object.values(selectedItem).includes(item.name)
+                            ? "checked"
+                            : "unchecked"
+                        }
+                        onPress={() => handleSelect("modalCategory", item.name)}
+                      /> */}
+
+
+                          <Checkbox
+                            status={
+                              selectedItem[currentCategoryKey]?.[item.name]
+                                ? "checked"
+                                : "unchecked"
+                            }
+                            onPress={() => handleCheckboxToggle(currentCategoryKey, item.name)}
+                          />
+
+                          <Text>{item.name} ({item.count})</Text>
+                        </View>
+                      )}
+                    />
+                    <Button mode='contained' onPress={() => setModalVisible(false)} >Close</Button>
+                  </View>
+                </View>
+              </View>
+
+            </Modal>
+
+          </View>
+          <View style={{ flexDirection: 'row',justifyContent:'space-evenly' }}>
+
+            <TouchableOpacity style={styles.closeButton} onPress={onClose}>
+              <Text style={styles.closeButtonText}>Close Modal</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.closeButton} onPress={onSubmit}>
+              <Text style={styles.submitButtonText}>Submit</Text>
+            </TouchableOpacity>
+            {/* <Button
+              mode='contained' >Submit
+            </Button> */}
+          </View>
+        </View>
+      </View>
+    </Modal>
+  );
+};
+
+const styles = StyleSheet.create({
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  modalContent: {
+    width: '95%',
+    height: '80%',
+    backgroundColor: '#FFF',
+    padding: 20,
+    borderRadius: 10,
+    // alignItems: 'center',
+  },
+  modalText: {
+    fontSize: 18,
+    marginBottom: 20,
+  },
+  closeButton: {
+    // backgroundColor: '#FF5252',
+    padding: 10,
+    borderRadius: 5,
+    
+    borderWidth:1,
+   
+  },
+  submitButton: {
+    // backgroundColor: '#FF5252',
+    padding: 10,
+    borderRadius: 5,
+    
+  },
+  closeButtonText: {
+    color:theme.colors.blue,
+    fontSize: 16,
+    fontWeight: 'bold',
+  },
+  submitButtonText: {
+    color:theme.colors.red,
+    fontSize: 16,
+    fontWeight: 'bold',
+  },
+
+
+  container: {
+    flex: 1,
+    padding: 16,
+  },
+  categoryContainer: {
+    marginBottom: 20,
+  },
+  categoryTitle: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingVertical: 10,
+    backgroundColor: '#f5f5f5',
+    borderRadius: 5,
+    paddingHorizontal: 12,
+  },
+  categoryCollapsed: {
+    backgroundColor: '#e0e0e0',
+  },
+  categoryText: {
+    fontSize: 18,
+    fontWeight: 'bold',
+  },
+  arrow: {
+    fontSize: 18,
+    fontWeight: 'bold',
+  },
+  itemContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 8,
+    paddingLeft: 16,
+  },
+  readMoreButton: {
+    alignItems: "center",
+    marginVertical: 10,
+  },
+  readMoreText: {
+    color: "#007BFF",
+    textDecorationLine: "underline",
+  },
+  modalContainer: {
+
+
+    // padding: 16,
+
+  },
+  modalTitle: {
+    fontSize: 20,
+    fontWeight: "bold",
+    marginBottom: 10,
+  },
+  // modalOverlay: {
+  //   flex: 1,
+  //   backgroundColor: 'rgba(0, 0, 0, 0.5)', // Transparent black background
+  //   justifyContent: 'center',
+  //   alignItems: 'center',
+  // },
+  // modalContent: {
+  //   width: '95%',
+  //   height: '90%',
+  //   backgroundColor: '#FFF',
+  //   padding: 20,
+  //   borderRadius: 10,
+  //   alignItems: 'center',
+  // },
+
+});
+
+export default CustomModal;

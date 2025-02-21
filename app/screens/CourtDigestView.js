@@ -2,7 +2,11 @@ import React, { useEffect, useState, useRef } from "react";
 import { FlatList, StyleSheet, Text, View, TouchableOpacity, ActivityIndicator, Pressable } from "react-native";
 import { getCourtDigestView } from "../api/api";
 import { SafeAreaView } from "react-native-safe-area-context";
-import globalStyle from "../core/Style"
+import globalStyle from "../core/Style";
+import { FontAwesome, Ionicons } from '@expo/vector-icons'
+
+
+import CustomModal from '../components/CustomModal';
 export default function CourtDigestView({ route, navigation }) {
     const { courtlist } = route.params;
     const [responseDigestView, setResponseDigestView] = useState([]);
@@ -15,6 +19,9 @@ export default function CourtDigestView({ route, navigation }) {
     const viewabilityConfig = useRef({ viewAreaCoveragePercentThreshold: 90 }).current; // To determine if an item is fully visible
     const [data, setData] = useState([]);
     const onEndReachedCalledDuringMomentum = useRef(false);
+    
+    const [filters, setFilters] = useState([]);
+    const [isModalVisible, setModalVisible] = useState(false);
     useEffect(() => {
         CourtDigestView();
     }, []);
@@ -67,6 +74,7 @@ export default function CourtDigestView({ route, navigation }) {
                 } else {
                     setHasMore(false);
                 }
+                setFilters(response.filter);
             }
             else {
                 setHasMore(false);
@@ -115,26 +123,47 @@ export default function CourtDigestView({ route, navigation }) {
             </View>
         );
     };
-    const CitationClick = (citationName,citationID) => {
+    const CitationClick = (citationName, citationID) => {
         console.log("Citation Click", citationName + citationID);
 
-        navigation.navigate('Judgement',{
+        navigation.navigate('Judgement', {
             citationID: citationID,
             citationName: citationName,
         }
         )
 
     }
+    const filterCompClick = () => {
+        console.log("filter click");
 
+        setModalVisible(true)
+    }
+    const handleModalClose = (data) => {
+        // setSelectedData(data); // Update the state with data from the modal
+        console.log("return modal data",data)
+        setModalVisible(false); // Close the modal
+      };
+
+      
     return (
         <SafeAreaView edges={['left', 'right', 'bottom']} style={globalStyle.safearea}>
+            <View style={{ flexDirection: "row", alignItems: 'center', justifyContent: "space-between", padding: 5 }}>
+                <Text>Result</Text>
+                <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                    <Text>Filters</Text>
+                    <TouchableOpacity style={styles.filterButton} onPress={filterCompClick}>
+                        <FontAwesome name="filter" size={30} color="#083e89" />
+                    </TouchableOpacity>
+                </View>
+            </View>
+
             <View style={styles.container}>
                 <FlatList
                     data={data}
                     renderItem={({ item }) =>
                     (
                         <View style={styles.item}>
-                            <Pressable onPress={() => CitationClick(item.citationName,item.citationID)}>
+                            <Pressable onPress={() => CitationClick(item.citationName, item.citationID)}>
                                 <Text style={styles.title} >{item.citationName}</Text>
                             </Pressable>
                             <Text style={styles.subtitle}>{item.nominal}</Text>
@@ -155,6 +184,10 @@ export default function CourtDigestView({ route, navigation }) {
                     keyExtractor={item => item.citationID}
                 />
             </View>
+            <CustomModal
+                visible={isModalVisible}
+                onClose={handleModalClose}
+            />
         </SafeAreaView>
 
     );
@@ -216,4 +249,13 @@ const styles = StyleSheet.create({
         borderColor: '#ddd',
         borderWidth: 1
     },
+    // filterButton: {
+    //     position: 'absolute',
+    //     bottom: 16,
+    //     right: 16,
+    //     backgroundColor: '#007BFF',
+    //     padding: 16,
+    //     borderRadius: 30,
+    //     elevation: 5,
+    //   },
 });

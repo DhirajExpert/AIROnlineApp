@@ -51,7 +51,7 @@ const fetchData = async () => {
         console.log("getLawyer", response);
 
       if (response.err_code === 'success') {
-        setResponseDigestView((prevData) => [...prevData, ...response.lawyerDataList]);
+        setResponseDigestView((prevData) => [...prevData, ...response.digestView]);
         setOffset((prevOffset) => prevOffset + 10); 
 
         

@@ -13,15 +13,14 @@ export default function BenchStrength({ navigation }) {
     const [selectedCourtName, setSelectedCourtName] = useState(null);
     const [courtValue, setCourtValue] = useState("");
     const [open, setOpen] = useState(false);
-    const [value, setValue] = useState("Either Petitioner or Respondent");
+    const [value, setValue] = useState("SINGLE BENCH");
     const [benchType, setBenchType] = useState([
-        { label: 'Either Petitioner or Respondent', value: 'Either Petitioner or Respondent' },
-        { label: 'Petitioner', value: 'Petitioner' },
-        { label: 'Respondent', value: 'Respondent' },
+        { label: 'Single Bench', value: 'SINGLE BENCH' },
+        { label: 'Divisional Bench', value: 'DIVISIONAL BENCH' },
+        { label: 'Larger/ full/ Constitutional Bench', value: 'FULL BENCH' },
     ]);
 
     const [activeInput, setActiveInput] = useState('one');
-
 
     useEffect(() => {
         const fetchBenchStrength = async () => {
@@ -40,14 +39,24 @@ export default function BenchStrength({ navigation }) {
         </View>
     );
     const onSubmit = () => {
-        console.log("courtValue", courtValue);
 
-        if (courtValue === "") {
+        var benchStrengthValue = '';
+        var benchStrenthType = '';
+        console.log("courtValue", courtValue);
+        console.log("Value", value);
+
+        if (activeInput === 'one') {
+            benchStrenthType = value
+        } else if (activeInput === 'two') {
+            benchStrengthValue = courtValue;
+        }
+        if (benchStrengthValue == "" && benchStrenthType == "") {
             Alert.alert("Please Select Value from Serchfield")
         }
         else {
             navigation.navigate('BenchStrengthDetails', {
-                benchStrength: courtValue
+                benchStrength: benchStrengthValue,
+                benchTypeFullName: benchStrenthType
             })
         }
     }
@@ -62,8 +71,7 @@ export default function BenchStrength({ navigation }) {
                 <View style={styles.radioContainer}>
                     <TouchableOpacity
                         style={styles.radioButton}
-                        onPress={() => setActiveInput('one')}
-                    >
+                        onPress={() => setActiveInput('one')}>
                         <View style={styles.outerCircle}>
                             {activeInput === 'one' && <View style={styles.innerCircle} />}
                         </View>
@@ -72,10 +80,40 @@ export default function BenchStrength({ navigation }) {
 
 
                 </View>
-                <View pointerEvents={isDropdownDisabled ? 'none' : 'auto'}>
+                <View pointerEvents={isDropdownDisabled ? 'none' : 'auto'}
+                    style={{ backgroundColor: '#ffffff' }}>
+                    <DropDownPicker
+                        style={[styles.dropdownpicker,
+                        activeInput === 'two' && styles.disabledInput,
+                        ]}
+                        open={open}
+                        value={value}
+                        items={benchType}
+                        setOpen={setOpen}
+                        setValue={setValue}
+                        setItems={setBenchType}
+                        dropDownContainerStyle={styles.dropdownContainer}
+                    />
+
+                </View>
+                <Text style={{
+                    alignSelf: 'center', marginVertical: 20, fontWeight: 'bold', fontSize: 18
+                }}>OR</Text>
+
+                <View style={styles.radioContainer}>
+                    <TouchableOpacity
+                        style={styles.radioButton}
+                        onPress={() => setActiveInput('two')}>
+                        <View style={styles.outerCircle}>
+                            {activeInput === 'two' && <View style={styles.innerCircle} />}
+                        </View>
+                        <Text style={styles.radioText}>HON'BLE Judges </Text>
+                    </TouchableOpacity>
+                </View>
+                <View pointerEvents={isCourtDropdownDisabled ? 'none' : 'auto'}>
                     <Dropdown
                         style={[styles.dropdown,
-                        activeInput === 'two' && styles.disabledInput,
+                        activeInput === 'one' && styles.disabledInput,
                         ]}
                         placeholderStyle={styles.placeholderStyle}
                         selectedTextStyle={styles.selectedTextStyle}
@@ -97,36 +135,6 @@ export default function BenchStrength({ navigation }) {
                         )}
                         renderItem={renderItem} />
                 </View>
-                <Text style={{
-                    alignSelf: 'center', marginVertical: 20, fontWeight: 'bold', fontSize: 18
-                }}>OR</Text>
-
-                <View style={styles.radioContainer}>
-                    <TouchableOpacity
-                        style={styles.radioButton}
-                        onPress={() => setActiveInput('two')}
-                    >
-                        <View style={styles.outerCircle}>
-                            {activeInput === 'two' && <View style={styles.innerCircle} />}
-                        </View>
-                        <Text style={styles.radioText}>HON'BLE Judges </Text>
-                    </TouchableOpacity>
-                </View>
-                <View pointerEvents={isCourtDropdownDisabled ? 'none' : 'auto'}>
-                    <DropDownPicker
-                        style={[styles.dropdownpicker,
-                        activeInput === 'one' && styles.disabledInput,
-                        ]}
-                        open={open}
-                        value={value}
-                        items={benchType}
-                        setOpen={setOpen}
-                        setValue={setValue}
-                        setItems={setBenchType}
-                        dropDownContainerStyle={styles.dropdownContainer}
-                    />
-                </View>
-
                 <Button
                     style={{
                         marginTop: 100
@@ -136,18 +144,16 @@ export default function BenchStrength({ navigation }) {
                     }>
                     Search
                 </Button>
-
-
             </View>
         </SafeAreaView>
     );
 }
-
 const styles = StyleSheet.create({
 
     safeArea: {
         flex: 1,
         paddingHorizontal: 20,
+        backgroundColor: '#fff'
     },
     container: {
         flex: 1,
@@ -228,7 +234,6 @@ const styles = StyleSheet.create({
         fontSize: 16,
     },
     dropdownpicker: {
-
         marginBottom: 20,
         width: '100%',
         borderColor: '#ccc',
@@ -248,6 +253,7 @@ const styles = StyleSheet.create({
     },
     dropdownContainer: {
         width: '100%',
+        backgroundColor: '#ffffff'
     },
     disabledInput: {
         backgroundColor: '#f0f0f0',

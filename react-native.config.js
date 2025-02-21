@@ -1,7 +1,7 @@
 module.exports = {
     project: {
-      ios: {},
-      android: {},
+      ios: {enableNewArchitecture: false},
+      android: {enableNewArchitecture: false},
     },
-    assets: ['./assets/fonts'], // adjust according to your path
+    assets: ['./node_modules/react-native-vector-icons/Fonts'], // adjust according to your path
   };

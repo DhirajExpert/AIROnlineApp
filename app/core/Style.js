@@ -1,18 +1,23 @@
 import { StyleSheet } from "react-native";
+import { theme } from "./theme";
 
 export default StyleSheet.create({
     safearea: {
         flex: 1,
-        paddingHorizontal: 20
+        // paddingHorizontal: 20
       },
 
       judges:{
         fontFamily: 'Signika_600SemiBold'
     },
     courts:{
-        fontSize: 16,
-        color: '#000',
-        fontWeight:'bold'
+        fontSize: 12,
+        color: theme.colors.red,
+        fontWeight:'bold',
+        
+        // backgroundColor:'yellow',
+        // alignSelf:'flex-end'
+        
     },
     nominal:{
         fontSize: 16,
@@ -46,9 +51,12 @@ export default StyleSheet.create({
   },
   noteContainer: {
     padding: 5,
-    backgroundColor: '#eef',
+    // backgroundColor: '#d9d9d9',
     marginTop: 8,
-    borderRadius: 4
+    borderRadius: 4,
+borderColor:'#d9d9d9',
+borderWidth:1,
+        
 },
 
 })

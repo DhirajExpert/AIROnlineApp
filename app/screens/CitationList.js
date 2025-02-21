@@ -1,107 +1,177 @@
-import React, { useEffect, useState } from "react";
-import { StyleSheet, View, FlatList, Text ,TouchableOpacity,Alert} from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
-import TextInput from "../components/TextInput";
-import Button from "../components/Button";
-import Header from "../components/Header";
-import globalstyle from '../core/Style'
-// import Icon from "react-native-vector-icons/FontAwesome"
-import { getCitation } from '../api/api'
-export default function CitationList({ navigation ,route }) {
-    const [citaionResponse, setCitaionResponse] = useState([]);
+import React, { useEffect, useState } from 'react';
+import { View, Text, FlatList, ActivityIndicator, StyleSheet, Alert,  TouchableOpacity } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { getCitation } from '../api/api';
+import {globalstyle} from '../core/Style';
+import Icon from 'react-native-vector-icons/FontAwesome';
 
+const CitationList = ({ journal, year, segment, court, page }) => {
+  // const { journal, year, segment, court, page } = route.params;
+  const [citations, setCitations] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
-    const { journal, year, segment, court, page } = route.params;
-
-     useEffect(() => {
-        const getCitationList = async () => {
-            response = await getCitation(journal, year, segment, court, page);
-            console.log("citationlist", response);
-            setCitaionResponse(response.citationList);
+  useEffect(() => {
+    const fetchCitations = async () => {
+      try {
+        setLoading(true);
+        const response = await getCitation(journal, year, segment, court, page);
+        if (response && response.citationList) {
+          setCitations(response.citationList);
+        } else {
+          setCitations([]);
         }
-        getCitationList();
-    }, []);
-   
-    
-    const handleCitationClick = (citationID,citationName) => {
-        // Alert.alert('Citation Clicked', `You clicked on ${citationName}`);
-        
-        navigation.navigate('Judgement', {
-            citationID: citationID,
-            citationName: citationName,
-          })
-      };
-    return (
+      } catch (err) {
+        setError(err);
+        Alert.alert('Error', err.message || 'Something went wrong!');
+      } finally {
+        setLoading(false);
+      }
+    };
 
-        <SafeAreaView edges={['bottom', 'left', 'right']} style={globalstyle.safearea}>
-            {/* <Header>Citation List </Header> */}
-            <View style={styles.container}>
-                {/* <TextInput
-                    label="Search By Court"
-                    value={name.value}
-                    onChangeText={(text) => setName({ value: text, error: "" })}
-                    error={!!name.error}
-                    errorText={name.error}
+    fetchCitations();
+  }, [journal, year, segment, court, page]);
 
-                    left={<TextInput.Icon icon="calendar" />}
-                // right={<TextInput.Icon icon="eye" />}
-                /> */}
-                {/* <Icon name="calendar" size={16} color="black" /> */}
-                {/* </TextInput> */}
+  const renderHeader = () => (
+    <View style={styles.headerRow}>
+      <Text style={styles.headerText}>Citations</Text>
+      <Text style={styles.headerText2}>Party Name</Text>
+      <Text style={styles.headerText1}>Topic</Text>
+    </View>
+  );
 
-                {/* <Button
-                    mode="contained"
-                    style={{ marginTop: 30 }}>
-                    Search
-                </Button> */}
-                <FlatList
-                    data={citaionResponse}
-                    renderItem={({ item }) =>
-                    (
-                        <View style={styles.item}>
-                            <TouchableOpacity onPress={() => handleCitationClick(item.citationID,item.citationName)}>
-                                <Text style={styles.citationName}>
-                                    {item.citationName}
-                                </Text>
-                            </TouchableOpacity>
-                            <Text style={styles.detail}>{item.nominal}</Text>
-                            <Text style={styles.detail}>{item.topic}</Text>
-                        </View>)
-                    }
-                    keyExtractor={item => item.citationID}
-                />
 
-            </View>
-        </SafeAreaView>
-    );
-}
+  return (
+    <SafeAreaView style={globalstyle.safearea}>
+      <View style={styles.container}>
+        {loading ? (
+          <ActivityIndicator size="large" color="#0000ff" />
+        ) : error ? (
+          <Text style={styles.errorText}>Error: {error.message || 'Unknown error'}</Text>
+        ) : citations.length > 0 ? (
+          <FlatList
+            data={citations}
+            keyExtractor={(item) => item.citationID || Math.random().toString()}
+            ListHeaderComponent={renderHeader}
+            renderItem={({ item }) => (
+              <View style={styles.citationCard}>
+                <View style={styles.row}>
+                  <Text style={styles.citationTitle}>{item.citationName}</Text>
+                  
+                  <View style={styles.separator} />
+                  
+                  <Text style={styles.partyName}>{item.nominal}</Text>
+                  <View style={styles.iconsContainer}>
+                  <TouchableOpacity >
+                    <Icon name="external-link" size={18} color="#003366" style={styles.icon} />
+                  </TouchableOpacity>
+                  <TouchableOpacity >
+                    <Icon name="bookmark" size={18} color="#003366" style={[styles.icon, styles.bookmarkIcon]} />
+                  </TouchableOpacity>
+                </View>
+                </View>
+              </View>
+            )}
+          />
+        ) : (
+          <Text style={styles.noDataText}>No citations found.</Text>
+        )}
+      </View>
+    </SafeAreaView>
+  );
+};
+
+export default CitationList;
+
 const styles = StyleSheet.create({
-    safearea: {
-        flex: 1,
-        paddingHorizontal: 20,
-    },
-    container: {
-        flex: 1,
-        justifyContent: "flex-start",
-        flexDirection: "column"
-
-    },
-    item: {
-        backgroundColor: '#d9dedb',
-        padding: 20,
-        marginVertical: 8,
-        borderRadius: 8,
-    },
-    title: {
-        fontSize: 18,
-        fontWeight: 'bold',
-    },
-    detail: {
-        fontSize: 14,
-    },
-    citationName: {
-        fontSize: 16,
-        color: 'blue', // Styling to show that it's clickable
-        textDecorationLine: 'underline',
-      },
+  container: {
+    flex: 1,
+    padding: 16,
+    // backgroundColor: '#faf6f6 ',
+    
+    marginTop: -250,
+  },
+  citationCard: {
+    backgroundColor: '#fff',
+    padding: 15,
+    marginVertical: 5,
+    borderRadius: 10,
+    elevation: 2, 
+  },
+  row: {
+    flexDirection: 'row', 
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  citationTitle: {
+    fontSize: 10,
+    fontWeight: 'bold',
+    color: '#0056b3', 
+    flex: 1,
+    textAlign: 'left',
+  },
+  separator: {
+    width: 2,
+    backgroundColor: '#ccc',
+    height: 50,
+    marginHorizontal: 40,
+    marginLeft: -5,
+  },
+  partyName: {
+    fontSize: 13,
+    color: '#333',
+    flex: 2,
+    textAlign: 'left',
+    left: -30,
+  },
+  errorText: {
+    color: 'red',
+    fontSize: 16,
+    textAlign: 'center',
+  },
+  noDataText: {
+    fontSize: 16,
+    textAlign: 'center',
+    marginTop: 20,
+  },
+  iconsContainer: {
+    flexDirection: 'column',  
+    justifyContent: 'space-between',
+    height: 40, 
+    marginRight: 10, 
+  },
+  icon: {
+    marginBottom: 10, 
+  },
+  bookmarkIcon: {
+    marginBottom: 0, 
+  },
+  headerRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    paddingVertical: 10,
+    // backgroundColor: '#f2f2f2',
+    paddingHorizontal: 15,
+  },
+  headerText: {
+    fontSize: 14,
+    fontWeight: 'bold',
+    color:"#003366",
+    flex: 1,
+    textAlign: 'left',
+  },
+  headerText1: {
+    marginRight: 5,
+    fontSize: 14,
+    fontWeight: 'bold',
+    color:"#003366",
+  },
+  headerText2: {
+    fontSize: 14,
+    fontWeight: 'bold',
+    color:"#003366",
+    flex: 1,
+    textAlign: 'left',
+    left: -45,
+  },
 });

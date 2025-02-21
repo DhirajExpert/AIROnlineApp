@@ -6,6 +6,8 @@
     "orientation": "portrait",
     "icon": "./assets/app.png",
     "userInterfaceStyle": "light",
+    "newArchEnabled": true,
+    
     "splash": {
       "image": "./assets/splash.png",
       "resizeMode": "contain",
@@ -13,13 +15,20 @@
     },
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.aironline.app"
+      "bundleIdentifier": "com.aironline.app",
+      "newArchEnabled": true 
     },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/app.png",
-        "backgroundColor": "#ffffff"
-      }
+        "backgroundColor": "#d9d9d9"
+      },
+      "permissions": [
+        "CAMERA",
+        "READ_EXTERNAL_STORAGE",
+        "WRITE_EXTERNAL_STORAGE"
+      ],
+      "newArchEnabled": true 
     },
     "web": {
       "favicon": "./assets/app.png"
@@ -36,7 +45,15 @@
       }
     },
     "plugins": [
-      "expo-font"
+      "expo-font",
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "The app accesses your photos to let you share them with your friends.",
+          "cameraPermission": "The app uses your camera to capture photos for your profile."
+        }
+      ],
+      "expo-secure-store"
     ]
   }
 }

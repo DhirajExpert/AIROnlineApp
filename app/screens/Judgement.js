@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useRef } from "react";
-import { StyleSheet, View, ScrollView, Image, FlatList, TouchableOpacity } from "react-native";
+import { StyleSheet, View, ScrollView, Image, FlatList, TouchableOpacity, ActivityIndicator } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import Header from "../components/Header";
 import { getjudgement } from "../api/api";
@@ -13,6 +13,7 @@ import Modal from "react-native-modal";
 import { theme } from "../core/theme";
 import { Dimensions } from "react-native";
 import { FAB } from 'react-native-paper';
+import { AntDesign, FontAwesome } from "@expo/vector-icons";
 
 export default function Judgement({ route }) {
     // const { width } = Dimensions.get('window');
@@ -20,7 +21,7 @@ export default function Judgement({ route }) {
     const paragraphRef = useRef(null);
     const [judgement, setJudgement] = useState("");
     const [errorCode, setErrorCode] = useState("");
-    const { citationID, citationName } = route.params;
+    const { citationID, citationName, datavalue } = route.params;
     const { width } = useWindowDimensions();
 
     const [visible, setVisible] = useState(false);
@@ -31,6 +32,10 @@ export default function Judgement({ route }) {
 
     const [modalVisible, setModalVisible] = useState(false);
     // const citationName = 'AIROnline 2019 JHA 177';
+    const [isDisabled, setIsDisabled] = useState(false);
+    const [count, setCount] = useState(0);
+    const [isPreviousDisabled, setIsPreviousDisabled] = useState(true);
+    const [loading, setLoading] = useState(false);
 
     const openModal = () => {
         setModalVisible(true);
@@ -40,12 +45,15 @@ export default function Judgement({ route }) {
         setModalVisible(false);
     };
 
+
     useEffect(() => {
         const showJudgement = async () => {
+            // setLoading(true);
             response = await getjudgement(citationID);
-            console.log("judgement Response", response);
+            console.log("judgement Response", response.err_code);
 
             if (response.err_code === "success") {
+                setLoading(false);
                 setErrorCode(response.err_code);
                 setEqualCitation(response.equalCitation);
                 setJudgement(response.content.replace(/<html>|<\/html>/g, '')
@@ -66,6 +74,7 @@ export default function Judgement({ route }) {
 
 
     }, []);
+
 
     // const customHTMLElementModels = {
     //     h2: {
@@ -117,12 +126,83 @@ export default function Judgement({ route }) {
         },
     };
 
+    const filteriButton = () => {
+
+    }
+    const filterSortClick = () => {
+
+    }
+    const filterCompClick = () => {
+
+    }
+
+    const callApi = async (citation) => {
+
+
+
+        try {
+            setLoading(true);
+            response = await getjudgement(citation);
+            console.log("judgement Response", response.err_code);
+
+            if (response.err_code === "success") {
+                setLoading(false);
+                setErrorCode(response.err_code);
+                setEqualCitation(response.equalCitation);
+                setJudgement(response.content.replace(/<html>|<\/html>/g, '')
+                    .replace(/<body>|<\/body>/g, '')
+                    .replace(/\n/g, '')
+                    .trim());
+            } else {
+                setJudgement("No data found for citation");
+            }
+        } catch (error) {
+
+        }
+        finally {
+            setLoading(false);
+        }
+    }
+    const filterPostClick = () => {
+        datavalue[count];
+        console.log("datavalue count", count);
+        setCount(prevCount => {
+            const newCount = prevCount + 1;
+            setIsPreviousDisabled(false);
+
+            callApi(datavalue[newCount].id);
+
+    
+            if (newCount >= datavalue.length-1) {
+                setIsDisabled(true);
+            }
+
+            return newCount;
+        });
+
+    }
+
+    const filterPreButton = () => {
+        if (count > 0) {
+            const newCount = count - 1;
+            setCount(newCount);
+
+            setIsDisabled(false);
+            console.log("datavalue", datavalue[count - 1].id)
+            callApi(datavalue[count - 1].id);
+
+            if (newCount === 0) {
+                setIsPreviousDisabled(true);
+            }
+        }
+    }
+
     return (
         <SafeAreaView edges={['bottom', 'left', 'right']} style={globalstyle.safearea}>
 
             {errorCode === 'success' ?
                 <View>
-                    <View >
+                    <View>
                         {equalCitation[0] === citationName ? null : <Button style={{
                             alignSelf: "flex-end", marginVertical: 5,
                         }}
@@ -132,6 +212,45 @@ export default function Judgement({ route }) {
                         </Button>
                         }
                     </View>
+                    <View style={styles.searchWithinStrip}>
+                        <View style={{ flexDirection: 'row', justifyContent: 'space-between', }}>
+                            <TouchableOpacity style={[styles.filterButton, { opacity: isPreviousDisabled ? 0.5 : 1 }]} disabled={isPreviousDisabled} onPress={filterPreButton}>
+                                {/* <AntDesign name="infocirlceo" size={20} color={theme.colors.white} /> */}
+                                <Image source={require('../../assets/icons/previous-page.png')}
+                                    style={styles.icon} />
+                            </TouchableOpacity>
+                            <TouchableOpacity style={styles.filterButton} onPress={filterSortClick}>
+                                <Image source={require('../../assets/icons/arrow_left.png')}
+                                    style={styles.icon} />
+                            </TouchableOpacity>
+                            <TouchableOpacity style={styles.filterButton} onPress={filterCompClick}>
+                                <Image source={require('../../assets/icons/search_white.png')}
+                                    style={styles.icon} />
+                            </TouchableOpacity>
+                            <TouchableOpacity style={styles.filterButton} onPress={filterCompClick}>
+                                <Image source={require('../../assets/icons/arrow_right.png')}
+                                    style={styles.icon} />
+                            </TouchableOpacity>
+                            <TouchableOpacity style={[styles.filterButton, { opacity: isDisabled ? 0.5 : 1 }]} disabled={isDisabled} onPress={filterPostClick}>
+                                <Image source={require('../../assets/icons/next-page.png')}
+                                    style={styles.icon} />
+                            </TouchableOpacity>
+                        </View>
+
+
+                        <View style={{ flexDirection: 'row', justifyContent: 'space-between', }}>
+                            <TouchableOpacity style={styles.filterButton} onPress={filteriButton}>
+                                <Image source={require('../../assets/icons/i_icon.png')}
+                                    style={styles.icon} />
+                            </TouchableOpacity>
+                            <TouchableOpacity style={styles.filterButton} onPress={filterSortClick}>
+                                <Image source={require('../../assets/icons/font_change_icon.png')}
+                                    style={styles.icon} />
+                            </TouchableOpacity>
+
+                        </View>
+                    </View>
+
                     <ScrollView ref={scrollViewRef}>
 
                         <View style={styles.container}>
@@ -168,7 +287,6 @@ export default function Judgement({ route }) {
                                                 </TouchableOpacity>
                                             )}
                                         />
-
                                         <Button title="Close Modal" style={{ backgroundColor: theme.colors.primary, alignSelf: "flex-end", marginVertical: 5, color: 'white' }} onPress={closeModal} />
                                     </View>
                                 </View>
@@ -194,7 +312,17 @@ export default function Judgement({ route }) {
                         height: 200, alignSelf: 'center',
                     }} source={require('../../assets/images/file-not-found.jpg')} />
                 </View>
+
+
+
             }
+            {setLoading ? (
+                <ActivityIndicator size="large" color="#007BFF" />
+            ) : (
+                <Text>Error</Text>
+            )}
+
+
 
         </SafeAreaView>
     );
@@ -249,9 +377,9 @@ const classesStyles = {
         width: '100%',
 
     },
-    // ChronologicalParas: {
-    //     textAlign: 'right'
-    // },
+    ChronologicalParas: {
+        textAlign: 'right'
+    },
 
     refferdCit: {
         flex: 1
@@ -291,6 +419,19 @@ const styles = StyleSheet.create({
         backgroundColor: "#F8F6F4",
         marginTop: 5
 
+    },
+    searchWithinStrip: {
+        flexDirection: "row",
+        alignItems: 'center',
+        alignContent: 'center',
+        justifyContent: "space-between",
+        padding: 7,
+        backgroundColor: '#022555',
+        paddingHorizontal: '8%',
+
+    },
+    filterButton: {
+        paddingHorizontal: 6
     },
     customHeading: {
         fontSize: 20,
@@ -344,6 +485,12 @@ const styles = StyleSheet.create({
     containerStyle: { backgroundColor: 'white', padding: 20 },
     paraNo: {
         flexDirection: 'row', justifyContent: 'flex-end'
-    }
+    },
+    icon: {
+        width: 24,
+        height: 24,
+        resizeMode: 'contain'
+    },
+
 
 }) 

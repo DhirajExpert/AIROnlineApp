@@ -38,6 +38,7 @@ export default function BrowseByJudge({ navigation }) {
         const filtered = response.judgeName.filter((item) =>
             item.toLowerCase().includes(word.toLowerCase())
         );
+        console.log("filtered",filtered);
         setFilteredData(filtered);
         //   } else {
         //     setFilteredData([]);

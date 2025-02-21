@@ -5,7 +5,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import globalStyle from "../core/Style";
 
 export default function BenchStrengthDetails({ route, navigation }) {
-    const { benchStrength } = route.params;
+    const { benchStrength,benchTypeFullName } = route.params;
     const [responseDigestView, setResponseDigestView] = useState([]);
     const [expandedNotes, setExpandedNotes] = useState({});
 
@@ -16,6 +16,8 @@ export default function BenchStrengthDetails({ route, navigation }) {
     const viewabilityConfig = useRef({ viewAreaCoveragePercentThreshold: 90 }).current; // To determine if an item is fully visible
     const [data, setData] = useState([]);
     const onEndReachedCalledDuringMomentum = useRef(false);
+
+    console.log("params",route.params);
     useEffect(() => {
         CourtDigestView();
     }, []);
@@ -25,7 +27,7 @@ export default function BenchStrengthDetails({ route, navigation }) {
 
         setLoading(true);
         try {
-            const response = await getBenchStrengthDetails(benchStrength, 10, `${offset}`);
+            const response = await getBenchStrengthDetails(benchStrength,benchTypeFullName, 10, `${offset}`);
             console.log("getBenchStrengthDetails", response);
 
             if (response.err_code === 'success') {
