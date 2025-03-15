@@ -1,14 +1,35 @@
-import React, { useState } from 'react';
+import React, { useState ,useEffect} from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Alert, Image } from 'react-native';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import * as ImagePicker from 'expo-image-picker';
 import Background from '../components/Background';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { theme } from "../core/theme"
+import { theme } from "../core/theme";
+import * as SecureStore from 'expo-secure-store';
 
 const ProfilePage = () => {
     const [imageUri, setImageUri] = useState(null);
     const [activeButton, setActiveButton] = useState('Basic Info');
+    const [user, setUser] = useState(null);
+
+ useEffect(() => {
+        const fetchUserData = async () => {
+            const authData = await SecureStore.getItemAsync('authLogin');
+
+            if (authData) {
+                const { userData, token } = JSON.parse(authData);
+                console.log('User Data in:', userData);
+                //   console.log('Token:', token);
+                setUser(userData.name);
+                return { userData, token };
+            } else {
+                console.log('No user data found');
+                return null;
+            }
+        };
+        fetchUserData();
+    }, []);
+
 
     const handleImagePicker = () => {
         Alert.alert(
@@ -96,7 +117,7 @@ const ProfilePage = () => {
                     </View>
                     <View style={{ paddingHorizontal: '5%', paddingVertical: '3%' }} >
                         <Text style={styles.name}>Your Registered Name</Text>
-                        <Text style={styles.username}>@yourusername</Text>
+                        <Text style={styles.username}>@{user}</Text>
                     </View>
                     <View style={styles.divider} />
 
@@ -262,7 +283,7 @@ const styles = StyleSheet.create({
     navButton: {
         backgroundColor: 'trasparent',
         paddingVertical: 10,
-        paddingHorizontal: 20,
+        paddingHorizontal: 15,
         borderRadius: 5,
         borderWidth: 1,
         borderColor: theme.colors.red,

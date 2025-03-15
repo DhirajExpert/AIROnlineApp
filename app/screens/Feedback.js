@@ -18,6 +18,7 @@ import globalstyle from '../core/Style'
 import { AntDesign, MaterialIcons, FontAwesome } from 'react-native-vector-icons';
 import { theme } from "../core/theme";
 import Textarea from 'react-native-textarea';
+import { ScrollView } from 'react-native-gesture-handler';
 
 
 export default function Feedback() {
@@ -25,6 +26,7 @@ export default function Feedback() {
     const [rating, setRating] = useState(0);
     const [text, setText] = useState('');
     const [modalVisible, setModalVisible] = useState(false);
+    const textInputRef = useRef(null);
 
     const filteriButton = () => {
 
@@ -50,12 +52,17 @@ export default function Feedback() {
     }
     const sendFeedback = () => {
         console.log("Click sendFeedback");
-        setModalVisible(true)
+        // setModalVisible(true)
+
+        if (textInputRef.current) {
+            textInputRef.current.focus();
+          }
     }
 
     return (
         <SafeAreaView edges={['left', 'right', 'bottom']} style={globalstyle.safearea}>
             <Background>
+                <ScrollView>
                 <View style={styles.container}>
 
                     <ImageBackground
@@ -113,7 +120,7 @@ export default function Feedback() {
                         <View >
                             <Text style={styles.emaillabel}>Got suggestion? We’d love to hear them!<Text style={{ fontWeight: '400' }}>(optional)</Text></Text>
                             <Textarea
-                                ref={textareaRef}
+                                ref={textInputRef}
                                 containerStyle={styles.textareaContainer}
                                 style={styles.textarea}
                                 onChangeText={onChange}
@@ -145,6 +152,7 @@ export default function Feedback() {
                     </View>
 
                 </View>
+                </ScrollView>
                 <Modal
                     transparent={true}
                     visible={modalVisible}

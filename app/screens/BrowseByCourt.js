@@ -76,6 +76,8 @@ export default function BrowseByCourt({ navigation }) {
             navigation.navigate('CourtDigestView', {
                 courtlist: selectedItems.map(item => item.label)
             })
+
+            
         }
     };
 

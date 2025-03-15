@@ -122,13 +122,12 @@ export default function BenchStrengthDetails({ route, navigation }) {
                             <FlatList
                                 data={item.shortNote}
                                 renderItem={({ item, index }) => renderShortNote({ item, index, citationID: item.citationID })}
-                                keyExtractor={(note, index) => index.toString()}
+                                // keyExtractor={(note, index) => index.toString()}
+                                keyExtractor={(item, index) => `${item.citationID}-${index}`}
                                 onEndReached={onEndReached}
                                 onEndReachedThreshold={0.1}
                                 onMomentumScrollEnd={onMomentumScrollEnd}
-                                ListFooterComponent={
-                                    loading ? <ActivityIndicator size="large" color="#0000ff" /> : null
-                                }
+                               
                             />
                             {/* <Text style={styles.advocateHeadingText}>Name of Advocates</Text>
                             <View >
@@ -154,6 +153,9 @@ export default function BenchStrengthDetails({ route, navigation }) {
                         </View>)
                     }
                     keyExtractor={item => item.citationID}
+                    ListFooterComponent={
+                        loading ? <ActivityIndicator size="large" color="#0000ff" /> : null
+                    }
                 />
             </View>
         </SafeAreaView>

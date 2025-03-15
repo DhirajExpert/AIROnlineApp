@@ -1,31 +1,69 @@
-{/*ForgotPassword/emailaddress */}
+{/*ForgotPassword/emailaddress */ }
 
 import React, { useState, useEffect, useRef } from 'react';
-import { View, StyleSheet, Image, Text, TextInput, TouchableOpacity, ScrollView, KeyboardAvoidingView, Platform} from 'react-native';
+import { View, StyleSheet, Image, Text, TextInput, TouchableOpacity, ScrollView, KeyboardAvoidingView, Platform, Alert,ActivityIndicator } from 'react-native';
 import Icon from "react-native-vector-icons/FontAwesome";
+import { getOtp } from '../api/api';
+import Toast from 'react-native-toast-message';
 
-const ForgotPassword = ({navigation}) => {
+const ForgotPassword = ({ navigation }) => {
 
   const [email, setEmail] = useState("");
   const [emailError, setEmailError] = useState('');
+  const [loading,setLoading] = useState(false);
 
   const validateEmail = (input) => {
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/; 
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (emailRegex.test(input)) {
-      setEmailError(''); 
+      setEmailError('');
     } else {
       setEmailError('Please enter a valid email address');
     }
-    setEmail(input); 
+    setEmail(input);
   };
-      
-  
 
+  const SubmitButton = () => {
+    if (email) {
+      console.log("submit button click");
+      forgotPassword();
+    }
+    else {
+      Alert.alert("Please enter email address");
+    }
+  }
+  const forgotPassword = async () => {
+    setLoading(true);
+    response = await getOtp(email);
+    console.log("otp",response.data.data);
+    if (response.data.status === 200) {
 
-  const SubmitButton = ()=>{
-    console.log("submit button click");
-    navigation.navigate('ForgotOTPpassword')
+      setLoading(false);
+      if (response.data.data.Success === 'OTP Sent') {
+        Toast.show({
+          type: 'success',
+          text1: 'You will receive an OTP on your registered mobile number and email.',
+          visibilityTime: 1000
+        });
+        navigation.navigate('ForgotOTPpassword', {
+          email: email
+        })
+      }
+    }
+    else if(response.data.status === 404){
+      setLoading(false);
 
+      Toast.show({
+        type: 'error',
+        text1: response.data.data.message,
+        visibilityTime: 1000
+      });
+
+    }
+    else{
+      if(error.response){
+        setLoading(false);
+      }
+    }
   }
 
   return (
@@ -38,7 +76,7 @@ const ForgotPassword = ({navigation}) => {
         contentContainerStyle={{
           flexGrow: 1,
           alignItems: "center",
-      
+
         }}
         keyboardShouldPersistTaps="handled"
       >
@@ -70,9 +108,14 @@ const ForgotPassword = ({navigation}) => {
           <TouchableOpacity>
             <Text style={styles.Text1}>Back to sign in</Text>
           </TouchableOpacity>
-          <TouchableOpacity style={styles.submitButton} onPress={()=>SubmitButton()}>
-            <Text style={styles.submitButtonText}>Submit</Text>
-          </TouchableOpacity>
+
+          {loading ? (
+            <ActivityIndicator size="large" color="blue" />
+          ) : (
+            <TouchableOpacity style={styles.submitButton} onPress={() => SubmitButton()}>
+              <Text style={styles.submitButtonText}>Submit</Text>
+            </TouchableOpacity>
+          )}
           <View style={styles.row1}>
             <Text style={styles.text1}>Login with a</Text>
             <TouchableOpacity>
@@ -122,7 +165,7 @@ const styles = StyleSheet.create({
   content: {
     width: "85%",
     alignItems: "center",
-    marginTop: 260, 
+    marginTop: 260,
   },
   heading: {
     fontSize: 28,
@@ -141,9 +184,9 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: "#6c757d",
     bottom: -40,
-    
+
   },
-  text1 : {
+  text1: {
     color: "#1D2542",
     fontSize: 16.5,
   },

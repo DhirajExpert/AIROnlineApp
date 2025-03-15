@@ -36,14 +36,14 @@ const CitationSearch1 = ({ navigation }) => {
     journalList();
 
   }, []);
-  
+
 
   const [value, setValue] = useState(null);
-  const [selectedJournal, setSelectedJournal] = useState(null);  
-  const [selectedYear, setSelectedYear] = useState(null);  
-  const [selectedSegment, setSelectedSegment] = useState(null);  
-  const [selectedCourt, setSelectedCourt] = useState(null); 
-  const [selectedPage, setSelectedPage] = useState(null);  
+  const [selectedJournal, setSelectedJournal] = useState(null);
+  const [selectedYear, setSelectedYear] = useState(null);
+  const [selectedSegment, setSelectedSegment] = useState(null);
+  const [selectedCourt, setSelectedCourt] = useState(null);
+  const [selectedPage, setSelectedPage] = useState(null);
 
   const [error, setError] = useState(null);
 
@@ -90,15 +90,15 @@ const CitationSearch1 = ({ navigation }) => {
   }
 
   return (
-    <SafeAreaView edges={['bottom', 'left', 'right', 'top']} style={globalstyle.safearea}>
+    <SafeAreaView edges={['bottom', 'left', 'right',]} style={globalstyle.safearea}>
       {/* <BackButton goBack={navigation.goBack}/> */}
-      <ScrollView>
+      <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
         <View style={styles.container} >
           {/* <Header>Citation Search Module</Header> */}
           {/* <Text style={{ marginLeft: 15, fontSize: 18, fontWeight: 'bold' }}>Citation Search Module</Text> */}
 
           {/* Dropdown for Journal Name */}
-          
+
           <Dropdown
             style={styles.dropdown}
             containerStyle={styles.dropdownContainer}
@@ -107,6 +107,7 @@ const CitationSearch1 = ({ navigation }) => {
             inputSearchStyle={styles.inputSearchStyle}
             iconStyle={styles.iconStyle}
             data={journalsNames}
+            
             search
             maxHeight={300}
             labelField="label"
@@ -116,8 +117,8 @@ const CitationSearch1 = ({ navigation }) => {
             value={selectedJournal}
             onChange={item => {
               setSelectedJournal(item.label);
-              setSelectedYear(null); 
-              setError(null); 
+              setSelectedYear(null);
+              setError(null);
               handleFirstDropdownChange(item.label)
             }
             }
@@ -125,7 +126,7 @@ const CitationSearch1 = ({ navigation }) => {
             //   <AntDesign style={styles.icon} color="black" name="book" size={20} />
             // )}
             renderItem={renderItem}
-            // modal={true}
+          // modal={true}
           />
 
           {/* Error message display */}
@@ -134,7 +135,7 @@ const CitationSearch1 = ({ navigation }) => {
           )}
 
           {/* Dropdown for Publication Year */}
-          
+
           <Dropdown
             style={styles.dropdown1}
             containerStyle={styles.dropdownContainer}
@@ -143,6 +144,7 @@ const CitationSearch1 = ({ navigation }) => {
             inputSearchStyle={styles.inputSearchStyle}
             iconStyle={styles.iconStyle}
             data={journalYears}
+            
             search
             maxHeight={300}
             labelField="label"
@@ -161,13 +163,13 @@ const CitationSearch1 = ({ navigation }) => {
             // )}
             renderItem={renderItem}
             onFocus={() => {
-              const canOpen = handleYearDropdownClick();  
-              return canOpen ? {} : { onClose: true }; 
+              const canOpen = handleYearDropdownClick();
+              return canOpen ? {} : { onClose: true };
             }}
           />
 
-          
-          
+
+
           <Dropdown
             style={styles.dropdown4}
             containerStyle={styles.dropdownContainer}
@@ -176,6 +178,7 @@ const CitationSearch1 = ({ navigation }) => {
             inputSearchStyle={styles.inputSearchStyle}
             iconStyle={styles.iconStyle}
             data={journalSegment}
+            
             search
             maxHeight={300}
             labelField="label"
@@ -199,6 +202,7 @@ const CitationSearch1 = ({ navigation }) => {
             inputSearchStyle={styles.inputSearchStyle}
             iconStyle={styles.iconStyle}
             data={journalCourt}
+            
             search
             maxHeight={300}
             labelField="label"
@@ -215,7 +219,7 @@ const CitationSearch1 = ({ navigation }) => {
             //   <AntDesign style={styles.icon} color="black" name="Safety" size={20} />
             // )}
             renderItem={renderItem} />
-          
+
           <Dropdown
             style={styles.dropdown2}
             containerStyle={styles.dropdownContainer}
@@ -224,6 +228,7 @@ const CitationSearch1 = ({ navigation }) => {
             inputSearchStyle={styles.inputSearchStyle}
             iconStyle={styles.iconStyle}
             data={journalPage}
+            
             search
             maxHeight={300}
             labelField="label"
@@ -239,6 +244,24 @@ const CitationSearch1 = ({ navigation }) => {
             // )}
             renderItem={renderItem} />
 
+
+          <TouchableOpacity
+            style={styles.searchButton}
+
+            onPress={() => {
+              setParams({
+                journal: selectedJournal,
+                year: selectedYear,
+                segment: selectedSegment,
+                court: selectedCourt,
+                page: selectedPage,
+                volumeNo:''
+              });
+              setShowCitations(true);
+            }}
+          >
+            <MaterialCommunityIcons name="magnify" size={40} color="red" />
+          </TouchableOpacity>
         </View>
 
         {/* <Button
@@ -257,49 +280,20 @@ const CitationSearch1 = ({ navigation }) => {
           Search
         </Button> */}
 
-        <TouchableOpacity
-          style={styles.searchButton}
-          // onPress={() =>
-          //   navigation.navigate('citationList', {
-          //     journal: selectedJournal,
-          //     year: selectedYear,
-          //     segment: selectedSegment,
-          //     court: selectedCourt,
-          //     page: selectedPage,
-          //   })
-            // <CitationList
-            // journal={selectedJournal}
-            // year={selectedYear}
-            // segment={selectedSegment}
-            // court={selectedCourt}
-            // page={selectedPage}
-            //  />
-            onPress={() => {
-              setParams({
-                journal: selectedJournal,
-                year: selectedYear,
-                segment: selectedSegment,
-                court: selectedCourt,
-                page: selectedPage,
-              });
-              setShowCitations(true);
-            }}
-        >
-          <MaterialCommunityIcons name="magnify" size={40} color="red" />
-        </TouchableOpacity>
-        
+
+
 
       </ScrollView>
-        {/* <View style={{ marginTop: 80 }}>
+      {/* <View style={{ marginTop: 80 }}>
           {showCitations && <CitationList {...params} />}
         </View> */}
 
-      
-      
 
-        {showCitations && <CitationList {...params} />}
-        
-      
+
+
+      {showCitations && <CitationList {...params} />}
+
+
     </SafeAreaView>
   );
 };
@@ -341,14 +335,14 @@ const styles = StyleSheet.create({
       width: 0,
       height: 1,
     },
-    
+
     shadowOpacity: 0.2,
     shadowRadius: 1.41,
 
     elevation: 2,
   },
   dropdown2: {
-    top: -155,
+    top: -100,
     marginRight: 73,
     marginLeft: 250,
     height: 30,
@@ -360,13 +354,37 @@ const styles = StyleSheet.create({
       width: 0,
       height: 1,
     },
-    
+    left: -120,
+
     shadowOpacity: 0.2,
     shadowRadius: 1.41,
 
     elevation: 2,
     paddingVertical: 4.29,
   },
+  // dropdown3: {
+  //   top: -55,
+  //   marginRight: 297,
+  //   marginLeft: 5,
+  //   height: 30,
+  //   backgroundColor: 'white',
+  //   padding: 12,
+  //   shadowColor: '#000',
+  //   marginBottom: 15,
+  //   shadowOffset: {
+  //     width: 0,
+  //     height: 1,
+  //   },
+
+  //   shadowOpacity: 0.2,
+  //   shadowRadius: 1.41,
+
+  //   elevation: 2,
+
+  // zIndex: 100,
+  // },
+
+
   dropdown3: {
     top: -55,
     marginRight: 297,
@@ -380,15 +398,14 @@ const styles = StyleSheet.create({
       width: 0,
       height: 1,
     },
-    
     shadowOpacity: 0.2,
     shadowRadius: 1.41,
-
-    elevation: 2,
+    elevation: 5,
+    zIndex: 500, // Ensures dropdown is above other elements
   },
   dropdown4: {
     // margin: 15,
-    top: -10,
+    top: -65,
     marginRight: 171,
     marginLeft: 130,
     height: 30,
@@ -400,7 +417,8 @@ const styles = StyleSheet.create({
       width: 0,
       height: 1,
     },
-    
+    right: -115,
+
     shadowOpacity: 0.2,
     shadowRadius: 1.41,
 
@@ -414,8 +432,8 @@ const styles = StyleSheet.create({
     backgroundColor: 'transparent',
     marginLeft: 340,
   },
-  
-  
+
+
   icon: {
     marginRight: 5,
   },
@@ -463,9 +481,9 @@ const styles = StyleSheet.create({
   dropdownContainer: {
     width: '100%',
   },
-  
-container:{
-  flex:1,
-  
-}
+
+  container: {
+    flex: 1,
+    zIndex: 500,
+  }
 });

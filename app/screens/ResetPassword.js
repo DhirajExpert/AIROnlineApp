@@ -1,17 +1,20 @@
-{/*Forget Password-3*/}
+{/*Forget Password-3*/ }
 
 
 import React, { useState, useRef } from 'react';
 import { View, StyleSheet, Image, Text, TextInput, TouchableOpacity, ScrollView, KeyboardAvoidingView, Platform } from 'react-native';
 import Icon from 'react-native-vector-icons/Feather';
+import { getResetPassword } from '../api/api'
+import Toast from 'react-native-toast-message';
 
-const ResetPassword = () => {
+const ResetPassword = ({ navigation,route }) => {
+  const { email } = route.params;
   const [error, setError] = useState('');
   const [error1, setError1] = useState('');
   const [newpassword, setNewPassword] = useState('');
   const [confirm, setConfirm] = useState('');
   const [isButtonDisabled, setIsButtonDisabled] = useState(true);
-  const confirmPasswordRef = useRef(null); 
+  const confirmPasswordRef = useRef(null);
 
   const validatenewpassword = (input) => {
     if (input.length < 8) {
@@ -35,11 +38,46 @@ const ResetPassword = () => {
 
   const updateButtonState = (password, confirmPassword) => {
     if (password.length >= 8 && password === confirmPassword) {
-      setIsButtonDisabled(false); 
+      setIsButtonDisabled(false);
     } else {
-      setIsButtonDisabled(true); 
+      setIsButtonDisabled(true);
     }
   };
+  const onSubmit = async () => {
+    console.log("button pressed",newpassword);
+    response = await getResetPassword(email, newpassword);
+    console.log("getResetPassword", response)
+    if (response.data.status === 200) {
+    
+          if (response.data.data.Success === 'Password Changed') {
+            Toast.show({
+              type: 'success',
+              text1: 'Password reset Successfully..!',
+              visibilityTime: 1000
+            });
+            navigation.navigate('LoginScreen')
+          }
+    
+        }
+        else if (response.data.status === 404) {
+    
+    
+          Toast.show({
+            type: 'error',
+            text1: response.data.message,
+            visibilityTime: 1000
+          });
+        }
+         else if (response.data.status === 406) {
+    
+    
+          Toast.show({
+            type: 'error',
+            text1: response.data.error,
+            visibilityTime: 1000
+          });
+        }
+  }
 
   return (
     <KeyboardAvoidingView
@@ -56,7 +94,7 @@ const ResetPassword = () => {
       >
         <View style={styles.staticBackgroundCard}>
           <Image
-           source={require('../../assets/images/AIR_logo_white.png')}
+            source={require('../../assets/images/AIR_logo_white.png')}
             style={styles.logo}
             resizeMode="contain"
           />
@@ -89,15 +127,15 @@ const ResetPassword = () => {
               placeholderTextColor="#6c757d"
               value={confirm}
               onChangeText={validateconfirm}
-              ref={confirmPasswordRef} 
-              returnKeyType="done" 
+              ref={confirmPasswordRef}
+              returnKeyType="done"
             />
           </View>
           {error1 ? (
             <Text style={styles.errorText1}>{error1}</Text>
           ) : null}
 
-          <TouchableOpacity style={[styles.submitButton,{ opacity: isButtonDisabled ? 0.6 : 1 }]} disabled={isButtonDisabled}>
+          <TouchableOpacity style={[styles.submitButton, { opacity: isButtonDisabled ? 0.6 : 1 }]} disabled={isButtonDisabled} onPress={() => onSubmit()}>
             <Text style={styles.submitButtonText}>Submit</Text>
           </TouchableOpacity>
         </View>

@@ -5,246 +5,7 @@ import {
 import { Button, RadioButton, Checkbox } from 'react-native-paper';
 import {theme} from "../core/theme";
 import { getFTSDigestView } from "../api/api";
-
-
-
-// const filter = {
-//   "courts": [
-//     {
-//       "name": "bombay high court",
-//       "count": 1
-//     },
-//     {
-//       "name": "patna high court",
-//       "count": 1
-//     },
-//     {
-//       "name": "supreme court",
-//       "count": 2
-//     },
-//     {
-//       "name": "uttarakhand high court",
-//       "count": 1
-//     }
-//   ],
-//   "judges": [
-//     {
-//       "name": "ahsanuddin amanullah",
-//       "count": 1
-//     },
-//     {
-//       "name": "ashwani kumar singh",
-//       "count": 1
-//     },
-//     {
-//       "name": "chakradhari sharan singh",
-//       "count": 1
-//     },
-//     {
-//       "name": "hemant gupta",
-//       "count": 1
-//     },
-//     {
-//       "name": "indu malhotra",
-//       "count": 1
-//     },
-//     {
-//       "name": "j.j. heaton",
-//       "count": 1
-//     },
-//     {
-//       "name": "krishna murari",
-//       "count": 1
-//     },
-//     {
-//       "name": "l.c. crump",
-//       "count": 1
-//     },
-//     {
-//       "name": "lallubhai asharam shah",
-//       "count": 1
-//     },
-//     {
-//       "name": "manoj kumar tiwari",
-//       "count": 1
-//     },
-//     {
-//       "name": "n. v. ramana",
-//       "count": 1
-//     },
-//     {
-//       "name": "rajendra kumar mishra",
-//       "count": 1
-//     },
-//     {
-//       "name": "ravindra maithani",
-//       "count": 1
-//     },
-//     {
-//       "name": "surya kant",
-//       "count": 1
-//     },
-//     {
-//       "name": "uday umesh lalit",
-//       "count": 1
-//     },
-//     {
-//       "name": "vikash jain",
-//       "count": 1
-//     },
-//     {
-//       "name": "vipin sanghi",
-//       "count": 1
-//     }
-//   ],
-//   "benchStrenth": [
-//     {
-//       "name": "3",
-//       "count": 4
-//     },
-//     {
-//       "name": "5",
-//       "count": 1
-//     }
-//   ],
-//   "topic": [
-//     {
-//       "name": "adulteration in turmeric powder",
-//       "count": 1
-//     },
-//     {
-//       "name": "criminal laws  (offences & punishment)",
-//       "count": 1
-//     },
-//     {
-//       "name": "mandi fees tecovered from purchaser",
-//       "count": 1
-//     },
-//     {
-//       "name": "report of public analyst",
-//       "count": 1
-//     },
-//     {
-//       "name": "sale price",
-//       "count": 1
-//     },
-//     {
-//       "name": "trusts",
-//       "count": 1
-//     },
-//     {
-//       "name": "validity",
-//       "count": 1
-//     },
-//     {
-//       "name": "value added tax",
-//       "count": 1
-//     },
-//     {
-//       "name": "waqf board",
-//       "count": 1
-//     }
-//   ],
-//   "remark": [
-//     {
-//       "name": "overruled",
-//       "count": 1
-//     },
-//     {
-//       "name": "reversed",
-//       "count": 1
-//     }
-//   ],
-//   "nominalApp": [
-//     {
-//       "name": "hargovind pulchand doshi",
-//       "count": 1
-//     },
-//     {
-//       "name": "prabhagiya vipnan prabandhak uttarakhand forest development ramnagar",
-//       "count": 1
-//     },
-//     {
-//       "name": "prem chand",
-//       "count": 1
-//     },
-//     {
-//       "name": "smriti madan kansagra",
-//       "count": 1
-//     },
-//     {
-//       "name": "suo motu cognizance",
-//       "count": 1
-//     }
-//   ],
-//   "nominalRes": [
-//     {
-//       "name": "bai hirbai",
-//       "count": 1
-//     },
-//     {
-//       "name": "commissioner commercial tax uttarakhand, dehradun",
-//       "count": 1
-//     },
-//     {
-//       "name": "perry kansagra",
-//       "count": 1
-//     },
-//     {
-//       "name": "state of bihar",
-//       "count": 1
-//     },
-//     {
-//       "name": "state of haryana",
-//       "count": 1
-//     }
-//   ],
-//   "caseResult": [
-//     {
-//       "name": "appeal allowed",
-//       "count": 1
-//     },
-//     {
-//       "name": "appeal dismissed",
-//       "count": 1
-//     },
-//     {
-//       "name": "order accordingly",
-//       "count": 1
-//     },
-//     {
-//       "name": "order accordingly.",
-//       "count": 1
-//     },
-//     {
-//       "name": "petition dismissed",
-//       "count": 1
-//     }
-//   ],
-//   "decisionYear": [
-//     {
-//       "name": "1920",
-//       "count": 1
-//     },
-//     {
-//       "name": "2020",
-//       "count": 2
-//     },
-//     {
-//       "name": "2021",
-//       "count": 1
-//     },
-//     {
-//       "name": "2023",
-//       "count": 1
-//     }
-//   ]
-// }
-
-
-// const filter = {"benchStrenth": [{"count": 4, "name": "1"}, {"count": 1, "name": "2"}, {"count": 1, "name": "13"}], "caseResult": [{"count": 1, "name": "cases remitted to constitution bench"}, {"count": 3, "name": "order accordingly"}, {"count": 1, "name": "petition allowed"}, {"count": 1, "name": "petition dismissed"}], "courts": [{"count": 2, "name": "bombay high court"}, {"count": 1, "name": "madras high court"}, {"count": 1, "name": "manipur high court"}, {"count": 1, "name": "meghalaya high court"}, {"count": 1, "name": "supreme court of india"}], "decisionYear": [{"count": 1, "name": "24"}, {"count": 2, "name": "1999"}, {"count": 1, "name": "2021"}, {"count": 2, "name": "2022"}], "judges": [{"count": 1, "name": "a. k. mukherjea"}, {"count": 1, "name": "a. n. grover"}, {"count": 1, "name": "a. n. ray"}, {"count": 1, "name": "d. d. sinha"}, {"count": 1, "name": "d. g. palekar"}, {"count": 1, "name": "dipankar datta"}, {"count": 1, "name": "h. r. khanna"}, {"count": 1, "name": "j. m. shelat"}, {"count": 1, "name": "k. govindarajan"}, {"count": 1, "name": "k. k. mathew"}, {"count": 1, "name": "k. s. hegde"}, {"count": 1, "name": "m. h. beg"}, {"count": 1, "name": "m. s. sonak"}, {"count": 1, "name": "m. sikri"}, {"count": 1, "name": "p. jaganmohan reddy"}, {"count": 1, "name": "s. n. dwivedi"}, {"count": 1, "name": "sanjay kumar"}, {"count": 1, "name": "sanjib banerjee"}, {"count": 1, "name": "y. v. chandrachud"}], "nominalApp": [{"count": 1, "name": "gopal damduji shelwatkar"}, {"count": 1, "name": "his holiness kesavananda bharati sripadgalvaru and others"}, {"count": 1, "name": "m/s. maya construction"}, {"count": 1, "name": "rathinam chettiar"}, {"count": 1, "name": "raviraj bandodkar"}, {"count": 1, "name": "salam robindro singh"}], "nominalRes": [{"count": 1, "name": "embar naidu"}, {"count": 1, "name": "gramin uddhar society"}, {"count": 1, "name": "officer-in-charge, andro police station, manipur"}, {"count": 1, "name": "state of goa"}, {"count": 1, "name": "state of kerala and another"}, {"count": 1, "name": "union of india"}], "remark": [], "topic": [{"count": 1, "name": "municipalities"}, {"count": 1, "name": "service laws"}, {"count": 1, "name": "specific relief specific relief"}]}
-
-
+import { color } from 'react-native-elements/dist/helpers';
 
 const CustomModal = ({ visible, onClose, handleModalDismiss, data }) => {
 
@@ -253,39 +14,7 @@ const CustomModal = ({ visible, onClose, handleModalDismiss, data }) => {
   const [page, setPage] = useState(0);
   const [loading, setLoading] = useState(false);
   const [staticData, setStaticData] = useState({});
-//   if(data || []){
-//   const [staticData, setStaticData] = useState({
-//     courts: data?.courts?.map(item => ({ name: item.name, count: item.count })) || [],
-//     judges: data?.judges?.map(item => ({ name: item.name, count: item.count })) || [],
-//     benchStrength: data?.benchStrength?.map(item => ({ name: item.name, count: item.count })) || [],
-//     topics: data?.topics?.map(item => ({ name: item.name, count: item.count })) || [],
-//     remarks: data?.remarks?.map(item => ({ name: item.name, count: item.count })) || [],
-//     Nominal: data?.Nominal?.map(item => ({ name: item.name, count: item.count })) || [],
-//     nominalRes: data?.nominalRes?.map(item => ({ name: item.name, count: item.count })) || [],
-//     Case_Results: data?.Case_Results?.map(item => ({ name: item.name, count: item.count })) || [],
-//     Decision_Years: data?.Decision_Years?.map(item => ({ name: item.name, count: item.count })) || [],
-//     Act: data?.acts?.map(item => ({ name: item.name, count: item.count })) || [],
-//   });
-// }
-// var staticData = '';
-// if(data || []){
 
-  
-//   setStaticData = {
-//     courts: data?.courts?.map(item => ({ name: item.name, count: item.count })),
-//     // courts: data?.courts.map(item => ({ name: item.name, count: item.count })),
-//     judges: data?.judges?.map(item => ({ name: item.name, count: item.count })),
-//     benchStrength: data?.benchStrenth?.map(item => ({ name: item.name, count: item.count })),
-//     topics: data?.topic?.map(item => ({ name: item.name, count: item.count })),
-//     remarks: data?.remark?.map(item => ({ name: item.name, count: item.count })), // remark is empty here
-//     Nominal: data?.nominalApp?.map(item => ({ name: item.name, count: item.count })),
-//     nominalRes: data?.nominalRes?.map(item => ({ name: item.name, count: item.count })),
-//     Case_Results: data?.caseResult?.map(item => ({ name: item.name, count: item.count })),
-//     Decision_Years: data?.decisionYear?.map(item => ({ name: item.name, count: item.count })),
-//     Act: data?.acts?.map(item => ({ name: item.name, count: item.count })),
-
-//   };
-// }
 
 useEffect(() => {
   if (data) {
@@ -379,15 +108,17 @@ useEffect(() => {
                     containerStyle={{
                       backgroundColor: "transparent",
                       borderWidth: 0,
+                     
                     }}
                     textStyle={{
                       fontSize: 16,
+                      
                     }}
                     checkedColor="#007BFF"
                     uncheckedColor="#C0C0C0"
                     onPress={() => handleCheckboxToggle(categoryName, item.name)}
                   />
-                  <Text>{item.name} ({item.count})</Text>
+                  <Text style={styles.itemname}>{item.name} ({item.count})</Text>
                 </View>
               )}
             />
@@ -571,11 +302,13 @@ useEffect(() => {
       <View style={styles.modalOverlay}>
         <View style={styles.modalContent}>
           <View >
-            <FlatList
+             <FlatList
               data={categories}
               keyExtractor={(item) => item.categoryName}
               renderItem={renderCategory}
-            />
+            /> 
+
+
 
             <Modal
               visible={modalVisible}
@@ -611,7 +344,7 @@ useEffect(() => {
                             onPress={() => handleCheckboxToggle(currentCategoryKey, item.name)}
                           />
 
-                          <Text>{item.name} ({item.count})</Text>
+                          <Text style={styles.itemname}>{item.name} ({item.count})</Text>
                         </View>
                       )}
                     />
@@ -623,7 +356,7 @@ useEffect(() => {
             </Modal>
 
           </View>
-          <View style={{ flexDirection: 'row',justifyContent:'space-evenly' }}>
+          <View style={styles.buttonContainer}>
 
             <TouchableOpacity style={styles.closeButton} onPress={onClose}>
               <Text style={styles.closeButtonText}>Close Modal</Text>
@@ -655,6 +388,7 @@ const styles = StyleSheet.create({
     padding: 20,
     borderRadius: 10,
     // alignItems: 'center',
+  
   },
   modalText: {
     fontSize: 18,
@@ -698,9 +432,10 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
     paddingVertical: 10,
-    backgroundColor: '#f5f5f5',
+    backgroundColor: '#ffffff',
     borderRadius: 5,
     paddingHorizontal: 12,
+   
   },
   categoryCollapsed: {
     backgroundColor: '#e0e0e0',
@@ -708,16 +443,19 @@ const styles = StyleSheet.create({
   categoryText: {
     fontSize: 18,
     fontWeight: 'bold',
+    color: theme.colors.blue
   },
   arrow: {
     fontSize: 18,
     fontWeight: 'bold',
+    color: theme.colors.blue
   },
   itemContainer: {
     flexDirection: 'row',
     alignItems: 'center',
     marginBottom: 8,
     paddingLeft: 16,
+    // borderBottomWidth:1
   },
   readMoreButton: {
     alignItems: "center",
@@ -738,6 +476,10 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     marginBottom: 10,
   },
+  itemname:{
+    color:theme.colors.blue,
+    fontSize:20
+  },
   // modalOverlay: {
   //   flex: 1,
   //   backgroundColor: 'rgba(0, 0, 0, 0.5)', // Transparent black background
@@ -752,6 +494,14 @@ const styles = StyleSheet.create({
   //   borderRadius: 10,
   //   alignItems: 'center',
   // },
+  buttonContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-evenly',
+    paddingVertical: 10,
+    borderTopWidth: 1,
+    borderColor: '#ccc',
+    backgroundColor: '#FFF',
+  }
 
 });
 

@@ -6,7 +6,8 @@
     "orientation": "portrait",
     "icon": "./assets/app.png",
     "userInterfaceStyle": "light",
-    "newArchEnabled": true,
+    "permissions": ["AUDIO_RECORDING"],
+   
     
     "splash": {
       "image": "./assets/splash.png",
@@ -16,7 +17,12 @@
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.aironline.app",
-      "newArchEnabled": true 
+      "newArchEnabled": true ,
+
+      "infoPlist": {
+    "NSSpeechRecognitionUsageDescription": "We need access to speech recognition for voice commands.",
+    "NSMicrophoneUsageDescription": "We need access to the microphone for speech recognition."
+  }
     },
     "android": {
       "adaptiveIcon": {
@@ -26,9 +32,15 @@
       "permissions": [
         "CAMERA",
         "READ_EXTERNAL_STORAGE",
-        "WRITE_EXTERNAL_STORAGE"
+        "WRITE_EXTERNAL_STORAGE",
+        "INTERNET",
+        "ACCESS_NETWORK_STATE"
+        
+        
       ],
-      "newArchEnabled": true 
+      "newArchEnabled": true ,
+      "usesCleartextTraffic": true,
+      "package":"com.aironline.app"
     },
     "web": {
       "favicon": "./assets/app.png"

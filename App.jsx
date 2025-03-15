@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Button, View, StyleSheet, Image, TouchableOpacity, Text, Platform, Dimensions, ActivityIndicator,StatusBar } from 'react-native'
+import { Button, View, StyleSheet, Image, TouchableOpacity, Text, Platform, Dimensions, ActivityIndicator } from 'react-native'
 import { IconButton, Provider } from "react-native-paper";
 import { NavigationContainer } from "@react-navigation/native";
 import { createStackNavigator } from "@react-navigation/stack";
@@ -20,6 +20,10 @@ import CustomDrawerContent from "./app/navigation/CustomDrawerContent";
 import Icon from 'react-native-vector-icons/Ionicons';
 import TabBar from "./app/components/TabBar";
 import * as SecureStore from 'expo-secure-store';
+import Toast, { BaseToast, ErrorToast } from 'react-native-toast-message';
+import { StatusBar } from 'expo-status-bar';
+import { DrawerToggleButton } from '@react-navigation/drawer';
+
 
 
 import { theme } from "./app/core/theme";
@@ -76,7 +80,12 @@ import {
   ResetPassword,
   ForgotOTPpassword,
   Statutes,
-  BareActDetails
+  BareActDetails,
+  SpecificSearch,
+  PlanPricing,
+  Jump,
+  Bookmark,
+  Promocode
 
 
 
@@ -86,6 +95,62 @@ import { SafeAreaView } from "react-native-safe-area-context";
 const Stack = createStackNavigator();
 const Drawer = createDrawerNavigator();
 const Tab = createBottomTabNavigator();
+
+const toastConfig = {
+ 
+  success: (props) => (
+    <BaseToast
+      {...props}
+      style={{ 
+        borderLeftColor: 'green' ,
+        borderLeftWidth:7,
+        width:'90%',
+        height:70,
+        borderRightColor:'green',
+        borderRightWidth:7,
+      }}
+      contentContainerStyle={{ paddingHorizontal: 15 }}
+      text1Style={{
+        fontSize: 17,
+        fontWeight: '700'
+      }}
+      text2style={{
+        fontSize:14
+      }}
+    />
+  ),
+  
+  error: (props) => (
+    <ErrorToast
+      {...props}
+      text2NumberOfLines={3}
+      style={{ 
+        borderLeftColor: 'red' ,
+        borderLeftWidth:7,
+        width:'90%',
+        height:70,
+        borderRightColor:'red',
+        borderRightWidth:7,
+      }}
+      contentContainerStyle={{ paddingHorizontal: 15 }}
+      text1Style={{
+        fontSize: 17,
+        fontWeight: '700'
+      }}
+      text2style={{
+        fontSize:14
+      }}
+    />
+  ),
+  
+  tomatoToast: ({ text1, props }) => (
+    <View style={{ height: 60, width: '100%', backgroundColor: 'tomato' }}>
+      <Text>{text1}</Text>
+      <Text>{props.uuid}</Text>
+    </View>
+  )
+};
+
 
 
 export default function App({ navigation }) {
@@ -138,9 +203,6 @@ export default function App({ navigation }) {
   //     </Tab.Navigator>
   //   );
   // }
-
-  // admin 
-  // 123455678
   if (loading) {
     return (
       <View style={styles.loaderContainer}>
@@ -189,10 +251,11 @@ export default function App({ navigation }) {
     <Provider theme={theme}>
       <NavigationContainer>
         <SafeAreaView edges={["bottom", "left", "right"]} style={{ flex: 1 }}>
-
-          <AppStack isLoggedIn={isLoggedIn} loading={loading}   />
-
+        <StatusBar style="light" />
+          <AppStack isLoggedIn={isLoggedIn} loading={loading}  navigation={navigation}/>
+          <Toast config={toastConfig} />
         </SafeAreaView>
+        
       </NavigationContainer>
     </Provider>
   );
@@ -241,7 +304,7 @@ const Bottomtabs = () => {
       <Tab.Screen name="Home" component={Dashboard}
 
       />
-      <Tab.Screen name="Navigation" component={Navigation} />
+      <Tab.Screen name="Navigation" component={Bookmark} />
       <Tab.Screen name="Profile" component={Profile} />
       <Tab.Screen name="AboutUs" component={AboutUs} />
       <Tab.Screen name="Help&Support" component={HelpSupport} />
@@ -279,7 +342,7 @@ const getGradientHeight = () => {
 const gradientHeight = getGradientHeight();
 
 
-const AppStack = ({ isLoggedIn,loading }) => {
+const AppStack = ({ isLoggedIn,loading,navigation}) => {
   //  SecureStore.deleteItemAsync('authLogin');
 
   // return(
@@ -290,7 +353,9 @@ const AppStack = ({ isLoggedIn,loading }) => {
     
   
 
-  <Stack.Navigator>
+  <Stack.Navigator
+  
+  >
     
 
     {loading ? (
@@ -305,6 +370,8 @@ const AppStack = ({ isLoggedIn,loading }) => {
           name="MainDrawer"
           component={DrawerNavigator}
           options={{ headerShown: false }}
+
+          
 
 
           // options={({ navigation }) => ({
@@ -335,14 +402,23 @@ const AppStack = ({ isLoggedIn,loading }) => {
 
     <Stack.Screen name="StartScreen" component={StartScreen} />
     {/* <Stack.Screen name="LoginScreen" component={LoginScreen} /> */}
-    <Stack.Screen name="RegisterScreen" component={RegisterScreen} />
+    <Stack.Screen name="RegisterScreen" component={RegisterScreen} 
+    options={({ navigation }) => ({
+      headerLeft: () => (
+        <TouchableOpacity onPress={() => navigation.goBack()} style={{ marginLeft: 15 }}>
+          <Icon name="arrow-back" size={24} color="black" />
+        </TouchableOpacity>
+      ),
+    })}
+     />
+    
     <Stack.Screen name="HomeScreen" component={HomeScreen} />
     <Stack.Screen name="CitationSearch" component={CitationSearch} />
     <Stack.Screen name="CitationSearch1" component={CitationSearch1}
       options={({ navigation }) => ({
-        header: () => (
-          <CustomHeader navigation={navigation} title="Citation Search" />
-        ),
+        // header: () => (
+        //   <CustomHeader navigation={navigation} title="Citation Search" />
+        // ),
       })}
     />
     <Stack.Screen name="NominalSearch" component={NominalSearch} />
@@ -457,6 +533,13 @@ const AppStack = ({ isLoggedIn,loading }) => {
     <Stack.Screen name="ResetPassword" component={ResetPassword} />
     <Stack.Screen name="Statutes" component={Statutes} />
     <Stack.Screen name="BareActDetails" component={BareActDetails} />
+    <Stack.Screen name="SpecificSearch" component={SpecificSearch}/>
+    <Stack.Screen name="PlanPricing" component={PlanPricing}/>
+    <Stack.Screen name="Jump" component={Jump}/>
+    <Stack.Screen name="Bookmark" component={Bookmark}/>
+    <Stack.Screen name="Promocode" component={Promocode}/>
+  
+  
 
     {/* <Stack.Screen
       name="MainDrawer"

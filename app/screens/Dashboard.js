@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState ,useEffect} from 'react';
 import { StyleSheet, View, Text, FlatList, Dimensions, TouchableOpacity, TextInput, Button, Alert, Image, Pressable } from 'react-native';
 import FilterScreen from './FilterScreen';
 import CustomModal from '../components/CustomModal';
@@ -13,7 +13,8 @@ import useAuthStore from '../authStore';
 
 
 
-const data = [
+
+const data = [  
     { id: '1', name: 'Citation Module' },
     { id: '2', name: 'Court Module' },
     { id: '3', name: 'Lawyer Module' },
@@ -32,8 +33,8 @@ const data = [
 ];
 const data1 = [
     { id: '1', name: 'Citation Module', path: require('../../assets/images/citation_logo.png') },
-    { id: '2', name: 'Court Module', path: require('../../assets/images/bareact_logo.png') },
-    { id: '3', name: 'Lawyer Module', path: require('../../assets/images/actsection_logo.png') },
+    { id: '2', name: 'Nominal Module', path: require('../../assets/images/nominal.png') },
+    { id: '3', name: 'Act & Section', path: require('../../assets/images/actsection_logo.png') },
     { id: '4', name: 'Browse by Bench', path: require('../../assets/images/bareact_logo.png') },
 
 ];
@@ -50,6 +51,12 @@ export default function Dashboard({ navigation }) {
     const [expandedNotes, setExpandedNotes] = useState({});
     const logout = useAuthStore((value) => value.logout)
 
+    
+
+  
+
+    
+
     const itemclick = (id) => {
         console.log("itemclick", id);
         switch (id) {
@@ -57,10 +64,10 @@ export default function Dashboard({ navigation }) {
                 navigation.navigate('CitationSearch1');
                 break;
             case '2':
-                navigation.navigate('BrowseByCourt');
+                navigation.navigate('NominalSearch');
                 break;
             case '3':
-                navigation.navigate('BrowseByLawyer');
+                navigation.navigate('ActSection');
                 break;
             case '4':
                 navigation.navigate('BenchStrength');
@@ -350,6 +357,7 @@ export default function Dashboard({ navigation }) {
     const onSubmitHandler = (event) => {
         console.log("Submit is click", event.nativeEvent.text);
     }
+
     return (
         <SafeAreaView edges={['left', 'right',]} style={styles.safearea}>
             {/* <ScrollView> */}
@@ -382,7 +390,7 @@ export default function Dashboard({ navigation }) {
                             // placeholderTextColor="#A9A9A9"
                             />
                             <View style={styles.searchBarIconContainer}>
-                                <TouchableOpacity >
+                                <TouchableOpacity  >
                                     <MaterialIcons name="mic" size={20} color={theme.colors.blue} />
                                 </TouchableOpacity>
                                 <TouchableOpacity>

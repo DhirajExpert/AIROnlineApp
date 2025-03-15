@@ -1,8 +1,11 @@
 import React, { useEffect, useState, useRef } from "react";
-import { FlatList, StyleSheet, TextInput, Text, View, TouchableOpacity, ActivityIndicator, Pressable, Image, Modal } from "react-native";
-import { getFTSDigestView } from "../api/api";
+import { FlatList, StyleSheet, TextInput, Text, View, TouchableOpacity, ActivityIndicator, Pressable, Image, Modal, } from "react-native";
+import { getFTSDigestView, getfolderDefault, getSubfolder } from "../api/api";
 import { SafeAreaView } from "react-native-safe-area-context";
 import globalStyle from "../core/Style";
+import CheckBox from "@react-native-community/checkbox";
+import { ScrollView } from "react-native-gesture-handler";
+
 // import { TextInput } from "react-native-paper";
 import { theme } from "../core/theme";
 import {
@@ -16,7 +19,6 @@ import { FontAwesome, Ionicons, MaterialIcons } from '@expo/vector-icons'
 import Background from "../components/Background";
 import AntDesign from '@expo/vector-icons/AntDesign';
 import CustomModal from '../components/CustomModal';
-
 
 
 export default function FreeTextSearchDetails({ route, navigation }) {
@@ -48,6 +50,12 @@ export default function FreeTextSearchDetails({ route, navigation }) {
     const [selectedOption, setSelectedOption] = useState("");
     var courts;
 
+    const [folders, setFolders] = useState([]); // Main folders
+    const [expandedFolders, setExpandedFolders] = useState({}); // Track expanded state
+    const [loadingSubfolders, setLoadingSubfolders] = useState({}); // Track loading state
+    const [bookmarlModalVisible, setbookmarlModalVisible] = useState(false); // Modal visibility
+    const [selectedFolders, setSelectedFolders] = useState({});
+
     useEffect(() => {
         CourtDigestView();
     }, []);
@@ -76,37 +84,52 @@ export default function FreeTextSearchDetails({ route, navigation }) {
             const response = await getFTSDigestView(searchword, 10, `${offset}`);
             console.log("getFTSDigestView", response);
 
-            if (response.err_code === 'success') {
-                console.log("count", response.docCount);
+            // if (response.err_code === 'success') {
+            //     console.log("count", response.docCount);
 
-                if (response.docCount > 0) {
-                    setResponseDigestView((prevData) => [...prevData, ...response.digestView]);
-                    setData((prevData) => [...prevData, ...(response.digestView)]);
-                    setOffset((prevOffset) => prevOffset + 10); // Increase offset by 10
-                    if (response.filter) {
-                        const updatedFilterData = {
-                            ...filterData,
-                            ...response.filter,
-                        };
-                        setFilterData(updatedFilterData);
-                        // console.log("Updated filterData:", updatedFilterData);
-                    } else {
-                        console.warn("Response filter is undefined or null");
-                    }
-
-
+            //     if (response.docCount > 0) {
+            //         setResponseDigestView((prevData) => [...prevData, ...response.digestView]);
+            //         setData((prevData) => [...prevData, ...(response.digestView)]);
+            //         setOffset((prevOffset) => prevOffset + 10); // Increase offset by 10
+            //         if (response.filter) {
+            //             const updatedFilterData = {
+            //                 ...filterData,
+            //                 ...response.filter,
+            //             };
+            //             setFilterData(updatedFilterData);
+            //             // console.log("Updated filterData:", updatedFilterData);
+            //         } else {
+            //             console.warn("Response filter is undefined or null");
+            //         }
 
 
-                    if (response.docCount < 10) {
-                        setHasMore(false);
-                    }
-                } else {
-                    setHasMore(false);
+
+
+            //         if (response.docCount < 10) {
+            //             setHasMore(false);
+            //         }
+            //     } else {
+            //         setHasMore(false);
+            //     }
+            // }
+            // else {
+            //     setHasMore(false);
+            // }
+
+            if (response?.err_code === 'success' && response?.docCount > 0) {
+                setResponseDigestView(prevData => [...prevData, ...response.digestView]);
+                setData(prevData => [...prevData, ...response.digestView]);
+                setOffset(prevOffset => prevOffset + 10);
+                setHasMore(response.docCount >= 10);
+
+                if (response.filter) {
+                    setFilterData(prev => ({ ...prev, ...response.filter }));
                 }
-            }
-            else {
+            } else {
                 setHasMore(false);
             }
+
+
         }
         catch (error) {
             console.error(error);
@@ -115,7 +138,7 @@ export default function FreeTextSearchDetails({ route, navigation }) {
     }
 
     useEffect(() => {
-        console.log("filterData updated:", filterData);
+        // console.log("filterData updated:", filterData);
     }, [filterData]);
 
     const toggleExpansion = (citationID, noteIndex) => {
@@ -126,12 +149,40 @@ export default function FreeTextSearchDetails({ route, navigation }) {
     };
 
 
+    // const onEndReached = () => {
+    //     if (!onEndReachedCalledDuringMomentum.current) {
+    //         CourtDigestView();
+    //         onEndReachedCalledDuringMomentum.current = true;
+    //     }
+    // };
+
     const onEndReached = () => {
-        if (!onEndReachedCalledDuringMomentum.current) {
-            CourtDigestView();
-            onEndReachedCalledDuringMomentum.current = true;
+        if (!onEndReachedCalledDuringMomentum.current && !loading && hasMore) {
+            onEndReachedCalledDuringMomentum.current = true; // Prevent duplicate calls
+            if (backdata && Object.keys(backdata).length > 0) {
+                CourtFilterDigestView(
+                    backdata.courts,
+                    backdata.judges,
+                    backdata.benchStrength,
+                    backdata.Case_Results,
+                    backdata.Decision_Years,
+                    backdata.Nominal,
+                    backdata.nominalRes,
+                    backdata.topics,
+                    backdata.Act,
+                    backdata.Section
+                ).finally(() => {
+                    onEndReachedCalledDuringMomentum.current = false;
+                });
+            } else {
+                CourtDigestView().finally(() => {
+                    onEndReachedCalledDuringMomentum.current = false;
+                });
+            }
         }
     };
+
+
     const onMomentumScrollEnd = () => {
         onEndReachedCalledDuringMomentum.current = false;
     };
@@ -160,12 +211,10 @@ export default function FreeTextSearchDetails({ route, navigation }) {
                     data={item.shortNote}
                     renderItem={({ item, index }) => renderShortNote({ item, index, citationID: item.citationID })}
                     keyExtractor={(note, index) => index.toString()}
-                    onEndReached={onEndReached}
-                    onEndReachedThreshold={0.1}
-                    onMomentumScrollEnd={onMomentumScrollEnd}
-                    ListFooterComponent={
-                        loading ? <ActivityIndicator size="large" color="#0000ff" /> : null
-                    }
+                // onEndReached={onEndReached}
+                // onEndReachedThreshold={0.1}
+                // onMomentumScrollEnd={onMomentumScrollEnd}
+
                 />
                 <View style={styles.headnoteStrip}>
                     <View style={{ flexDirection: 'row', justifyContent: 'space-around', alignItems: 'center', }}>
@@ -266,7 +315,105 @@ export default function FreeTextSearchDetails({ route, navigation }) {
     };
     const openBookmark = () => {
         console.log("bookmark");
+
+        setbookmarlModalVisible(true);
+        fetchMainFolders();
     }
+
+    // Fetch Main Folders on Modal Open
+    const fetchMainFolders = async () => {
+        try {
+
+            const response = await getfolderDefault('BF');
+            console.log("folder data", response.data.data.userDataList);
+
+            setFolders(response.data.data.userDataList);
+
+
+        } catch (error) {
+            console.error("Error fetching main folders:", error);
+        }
+    };
+
+
+    // Fetch Subfolders when clicking a main folder
+    const fetchSubFolders = async (folderId) => {
+        if (expandedFolders[folderId]) {
+            setExpandedFolders((prev) => ({ ...prev, [folderId]: false }));
+            return;
+        }
+
+        setLoadingSubfolders((prev) => ({ ...prev, [folderId]: true }));
+        try {
+
+
+
+            const response = await getSubfolder(folderId, '');
+            console.log("getSubfolder data", response.data.data);
+            // const response = await fetch(`https://api.example.com/subfolders?folderId=${folderId}`);
+            const data = response.data.data.userDataList;
+
+            setFolders((prevFolders) =>
+                prevFolders.map((folder) =>
+                    folder.id === folderId ? { ...folder, subFolders: data } : folder
+                )
+            );
+
+            setExpandedFolders((prev) => ({ ...prev, [folderId]: true }));
+        } catch (error) {
+            console.error("Error fetching subfolders:", error);
+        }
+        setLoadingSubfolders((prev) => ({ ...prev, [folderId]: false }));
+    };
+
+    // Handle Folder Selection
+    const toggleSelection = (folderId) => {
+        setSelectedFolders((prev) => ({
+            ...prev,
+            [folderId]: !prev[folderId],
+        }));
+    };
+
+
+    // 📂 Toggle Folder Expansion & Fetch Subfolders
+    const toggleFolderExpansion = async (folderId) => {
+        setExpandedFolders((prev) => ({
+            ...prev,
+            [folderId]: !prev[folderId],
+        }));
+
+        if (!folderData[folderId]) {
+            const subFolders = await fetchSubFolders(folderId);
+            setFolderData((prev) => ({
+                ...prev,
+                [folderId]: subFolders,
+            }));
+        }
+    };
+
+    // 🔄 Recursive Function to Render Folders
+    const renderFolders = (folders, level = 0) => {
+        return folders.map((item) => (
+            <View key={item.userDataId} style={{ paddingLeft: level * 20 }}>
+                {/* ✅ Folder Row */}
+                <TouchableOpacity
+                    onPress={() => toggleFolderExpansion(item.userDataId)}
+                    style={styles.folderRow}
+                >
+                    <AntDesign name={expandedFolders[item.userDataId] ? "minus" : "plus"} size={16} />
+                    <Text style={styles.folderText}>{item.title}</Text>
+                </TouchableOpacity>
+
+                {/* 📁 Render Subfolders if Expanded */}
+                {expandedFolders[item.userDataId] && folderData[item.userDataId] && (
+                    <View>{renderFolders(folderData[item.userDataId], level + 1)}</View>
+                )}
+            </View>
+        ));
+    };
+
+
+
     const filterCompClick = () => {
         setModalVisible(true);
         setData([]);
@@ -281,50 +428,91 @@ export default function FreeTextSearchDetails({ route, navigation }) {
     }
 
     const handleModalClose = (data) => {
-        // setSelectedData(data); // Update the state with data from the modal
-        console.log("return modal data", data);
-        setBackdata(data);
+
+        // setBackdata(data);
+
+        if (data && Object.keys(data).length > 0) {
+            setBackdata(data);  // Set valid data
+        } else {
+            setBackdata(null);  // Ensure `backdata` is reset when closing without selection
+        }
         setModalVisible(false);
     };
     useEffect(() => {
-        if (backdata) {
+
+        // console.log("backdata is called", backdata);
+        // CourtFilterDigestView(backdata.courts, backdata.judges, backdata.benchStrength, backdata.Case_Results, backdata.Decision_Years, backdata.Nominal, backdata.nominalRes, backdata.topics, backdata.Act, backdata.Section)
+
+        if (backdata && Object.keys(backdata).length > 0) {
+            // if (backdata && backdata.length > 0) {
             console.log("backdata is called", backdata);
-            CourtFilterDigestView(backdata.courts, backdata.judges, backdata.benchStrength, backdata.Case_Results, backdata.Decision_Years, backdata.Nominal, backdata.nominalRes, backdata.topics,backdata.Act,backdata.Section)
+            CourtFilterDigestView(
+                backdata.courts,
+                backdata.judges,
+                backdata.benchStrength,
+                backdata.Case_Results,
+                backdata.Decision_Years,
+                backdata.Nominal,
+                backdata.nominalRes,
+                backdata.topics,
+                backdata.Act,
+                backdata.Section
+            );
+        } else {
+            console.log("Modal is empty or backdata is missing");
         }
     }, [backdata]);
 
 
-    const CourtFilterDigestView = async (courts, judges, benchStrength, Case_Results, Decision_Years, Nominal, nominalRes, topics,acts,section, searchInSearch) => {
+    const CourtFilterDigestView = async (courts, judges, benchStrength, Case_Results, Decision_Years, Nominal, nominalRes, topics, acts, section, searchInSearch) => {
         if (loading) return;
         setLoading(true);
         try {
 
             const searchFilter = 'searchFilter';
-            const response = await getFTSDigestView(searchword, 10, `${page}`, courts, judges, benchStrength, Case_Results, Decision_Years, Nominal, nominalRes, topics,acts,section, searchFilter, searchInSearch);
-            console.log("getFTSDigestView", response);
+            const response = await getFTSDigestView(searchword, 10, `${page}`, courts, judges, benchStrength, Case_Results, Decision_Years, Nominal, nominalRes, topics, acts, section, searchFilter, searchInSearch);
+            console.log("CourtFilterDigestView", response);
 
-            if (response.err_code === 'success') {
-                console.log("count", response.docCount);
+            // if (response.err_code === 'success') {
+            //     console.log("count", response.docCount);
 
-                if (response.docCount > 0) {
-                    setResponseDigestView((prevData) => [...prevData, ...response.digestView]);
-                    setData((prevData) => [...prevData, ...(response.digestView)]);
-                    setPage((prevPage) => prevPage + 10);
-                    setFilterData((prevFilterData) => ({ ...prevFilterData, ...response.filter }));
-                    if (response.docCount < 10) {
-                        setHasMore(false);
-                    }
-                } else {
-                    setHasMore(false);
+            //     if (response.docCount > 0) {
+            //         setResponseDigestView((prevData) => [...prevData, ...response.digestView]);
+            //         setData((prevData) => [...prevData, ...(response.digestView)]);
+            //         setPage((prevPage) => prevPage + 10);
+            //         setFilterData((prevFilterData) => ({ ...prevFilterData, ...response.filter }));
+            //         if (response.docCount < 10) {
+            //             setHasMore(false);
+            //         }
+            //     } else {
+            //         setHasMore(false);
+            //     }
+            // }
+            // else if (response.err_code === 'ERR_01') {
+            //     setData([]);
+            //     setResponseDigestView([]);
+            //     setHasMore(false);
+            // }
+            // else {
+
+            //     setHasMore(false);
+            // }
+
+            if (response?.err_code === 'success' && response?.docCount > 0) {
+                setResponseDigestView(prevData => [...prevData, ...response.digestView]);
+                setData(prevData => [...prevData, ...response.digestView]);
+                setOffset(prevOffset => prevOffset + 10);
+                setHasMore(response.docCount >= 10);
+
+                if (response.filter) {
+                    setFilterData(prev => ({ ...prev, ...response.filter }));
                 }
             }
             else if (response.err_code === 'ERR_01') {
                 setData([]);
                 setResponseDigestView([]);
                 setHasMore(false);
-            }
-            else {
-
+            } else {
                 setHasMore(false);
             }
         }
@@ -334,7 +522,9 @@ export default function FreeTextSearchDetails({ route, navigation }) {
         setLoading(false);
     }
     const HandleSelect = (event) => {
-        if ((event.nativeEvent.text).length < 3) {
+        event.persist();
+        const searchText = event.nativeEvent.text;
+        if (searchText.length < 3) {
             Alert.alert("please search more than 3 characters");
         }
         else {
@@ -343,18 +533,18 @@ export default function FreeTextSearchDetails({ route, navigation }) {
                 console.log("data not found");
                 setData([]);
                 setPage(0);
-                CourtFilterDigestView('', '', '', '', '', '', '', '', event.nativeEvent.text)
+                CourtFilterDigestView('', '', '', '', '', '', '', '', searchText)
             }
             else {
-                CourtFilterDigestView(backdata.courts, backdata.judges, backdata.benchStrength, backdata.Case_Results, backdata.Decision_Years, backdata.Nominal, backdata.nominalRes, backdata.topics,backdata.Act, event.nativeEvent.text)
+                CourtFilterDigestView(backdata.courts, backdata.judges, backdata.benchStrength, backdata.Case_Results, backdata.Decision_Years, backdata.Nominal, backdata.nominalRes, backdata.topics, backdata.Act, searchText)
             }
         }
 
     }
-    const handleRadioClick=(item)=>{
+    const handleRadioClick = (item) => {
 
-         setSelectedOption(item);
-         setSortModalVisible(false);
+        setSelectedOption(item);
+        setSortModalVisible(false);
     }
 
     return (
@@ -393,7 +583,7 @@ export default function FreeTextSearchDetails({ route, navigation }) {
                                         keyExtractor={(item, index) => index.toString()}
                                         renderItem={({ item }) => (
                                             <TouchableOpacity style={styles.option}
-                                            onPress={()=>handleRadioClick(item)}
+                                                onPress={() => handleRadioClick(item)}
                                             >
                                                 {/* Radio Button */}
                                                 <View style={styles.radioButtonContainer}>
@@ -441,8 +631,89 @@ export default function FreeTextSearchDetails({ route, navigation }) {
                         renderItem={({ item }) => renderData({ item })
 
                         }
-                        keyExtractor={item => item.citationID}
+                        keyExtractor={(item, index) => `${item.citationID}-${index}`}
+                        ListFooterComponent={
+                            loading && <ActivityIndicator size="large" color="#0000ff" />
+                        }
+
+                        onEndReached={onEndReached}
+                        onEndReachedThreshold={0.1}
+                        onMomentumScrollEnd={onMomentumScrollEnd}
+                        initialNumToRender={10}  // Improve initial rendering
+                        maxToRenderPerBatch={10} // Improve batch rendering
+                        windowSize={5}
                     />
+
+
+                    {/* 📂 Folder Selection Modal */}
+                    {/* <Modal animationType="slide" transparent={true} visible={bookmarlModalVisible}>
+                        <View style={styles.modalContainer}>
+                            <View style={styles.modalContent1}>
+                                <Text style={styles.modalTitle}>Select Folder</Text>
+
+                                
+                                <FlatList
+                                    data={folders}
+
+                                   
+                                    keyExtractor={(item, index) => `${item.id}-${index}`}
+                                    renderItem={({ item }) => (
+                                        <View>
+                                            
+                                            <TouchableOpacity
+                                                onPress={() => fetchSubFolders(item.id)}
+                                                style={styles.folderRow}
+                                            >
+                                                <AntDesign name={expandedFolders[item.userDataId] ? "minus" : "plus"} size={16} />
+                                               
+                                                <Text style={styles.folderText}>{item.userDataTitle}</Text>
+                                            </TouchableOpacity>
+
+                                           
+                                            {expandedFolders[item.userDataId] && (
+                                                <View style={{ paddingLeft: 20 }}>
+                                                    {subFolders.map((sub) => (
+                                                        <View key={sub.userDataId} style={{ flexDirection: "row", alignItems: "center", padding: 5 }}>
+                                                            <CheckBox
+                                                                value={!!selectedFolders[sub.userDataId]}
+                                                                onValueChange={() => toggleSelection(sub.userDataId)}
+                                                            />
+                                                            <Text style={{ marginLeft: 10 }}>{sub.title}</Text>
+                                                        </View>
+                                                    ))}
+                                                </View>
+                                            )}
+                                        </View>
+                                    )}
+                                />
+
+                                
+                                <TouchableOpacity
+                                    style={styles.closeButton}
+                                    onPress={() => setbookmarlModalVisible(false)}
+                                >
+                                    <Text style={styles.buttonText}>Close</Text>
+                                </TouchableOpacity>
+                            </View>
+                        </View>
+                    </Modal> */}
+
+
+                    <Modal animationType="slide" transparent={true} visible={bookmarlModalVisible}>
+                        <View style={styles.modalContainer}>
+                            <View style={styles.modalContent1}>
+                                <Text style={styles.modalTitle}>Select Folder</Text>
+
+                                {/* 📂 Folder List */}
+                                <ScrollView>{renderFolders(folders)}</ScrollView>
+
+                                {/* ❌ Close Button */}
+                                <TouchableOpacity style={styles.closeButton} onPress={() => setbookmarlModalVisible(false)}>
+                                    <Text style={styles.buttonText}>Close</Text>
+                                </TouchableOpacity>
+                            </View>
+                        </View>
+                    </Modal>
                 </View>
                 <CustomModal
                     visible={isModalVisible}
@@ -595,6 +866,12 @@ const styles = StyleSheet.create({
         borderRadius: 5,
         color: theme.colors.darkgray
     },
+    modalContainer: {
+        flex: 1,
+        backgroundColor: "rgba(0,0,0,0.5)",
+        justifyContent: "center",
+        alignItems: "center",
+    },
     modalOverlay: {
         flex: 1,
         backgroundColor: "rgba(0, 0, 0, 0.5)",
@@ -620,21 +897,21 @@ const styles = StyleSheet.create({
     modalTitle: {
         fontSize: 18,
         fontWeight: "bold",
-        color:theme.colors.white
+        color: theme.colors.white
     },
     option: {
         flexDirection: "row",
         alignItems: "center",
-        
+
         paddingVertical: '4%',
         // borderBottomWidth: 1,
         // borderBottomColor: "#eee",
-      },
+    },
     optionText: {
         fontSize: 16,
-        paddingHorizontal:'5%',
-        color:theme.colors.white,
-        fontWeight:'600'
+        paddingHorizontal: '5%',
+        color: theme.colors.white,
+        fontWeight: '600'
     },
     radioButtonContainer: {
         height: 20,
@@ -644,16 +921,50 @@ const styles = StyleSheet.create({
         borderColor: theme.colors.white,
         justifyContent: "center",
         alignItems: "center",
-      },
-      radioButton: {
+    },
+    radioButton: {
         height: 10,
         width: 10,
         borderRadius: 5,
         backgroundColor: "transparent",
-      },
-      radioButtonSelected: {
+    },
+    radioButtonSelected: {
         backgroundColor: theme.colors.white,
-      },
+    },
 
+    modalContent1: {
+        backgroundColor: "white",
+        padding: 20,
+        borderRadius: 10,
+        width: "80%",
+    },
+    closeButton: {
+        backgroundColor: "red",
+        padding: 10,
+        borderRadius: 5,
+        marginTop: 10,
+        alignItems: "center",
+    },
+    folderRow: {
+        flexDirection: "row",
+        alignItems: "center",
+        padding: 5,
+    },
+    folderText: {
+        marginLeft: 5,
+        fontSize: 16,
+    },
+    subFolderContainer: {
+        paddingLeft: 20,
+    },
+    subFolderRow: {
+        flexDirection: "row",
+        alignItems: "center",
+        padding: 5,
+    },
+    subFolderText: {
+        marginLeft: 5,
+        fontSize: 14,
+    },
 
 });

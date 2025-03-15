@@ -109,7 +109,7 @@ const CustomDrawerContent = ({ props, navigation }) => {
                         <Image source={require('../../assets/screenshot/theme_mode.png')} style={styles.icon} />
                         <Text style={styles.customText}>Search</Text>
                     </TouchableOpacity>
-                    <TouchableOpacity style={styles.customItem} onPress={() => navigation.navigate('CitationSearch1')}>
+                    <TouchableOpacity style={styles.customItem} onPress={() => navigation.navigate('SpecificSearch')}>
                         <Image source={require('../../assets/screenshot/specific_search.png')} style={styles.icon} />
                         <Text style={styles.customText}>Specific Search</Text>
                     </TouchableOpacity>
@@ -125,7 +125,7 @@ const CustomDrawerContent = ({ props, navigation }) => {
                         <Image source={require('../../assets/screenshot/Shop.png')} style={styles.icon} />
                         <Text style={styles.customText}>Shop Products</Text>
                     </TouchableOpacity>
-                    <TouchableOpacity style={styles.customItem} onPress={() => alert('Custom Item Pressed')}>
+                    <TouchableOpacity style={styles.customItem} onPress={() => navigation.navigate('PlanPricing')}>
                         <Image source={require('../../assets/screenshot/plan_pricing.png')} style={styles.icon} />
                         <Text style={styles.customText}>Plans & Pricing</Text>
                     </TouchableOpacity>

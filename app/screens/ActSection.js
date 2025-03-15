@@ -2,11 +2,12 @@ import React, { useState, useEffect } from "react";
 import { View, StyleSheet, TouchableOpacity, Text, ActivityIndicator, Alert, ScrollView, TextInput } from "react-native";
 import { Dropdown, MultiSelect } from "react-native-element-dropdown";
 import { MaterialIcons } from "@expo/vector-icons";
+import { getActList, getSectionDetails } from "../api/api";
 
 const API_URL_ACTS = "https://aisnagpur.com/aironline/act/act_list?searchString=&limit=100&offset=0";
 const API_URL_SECTIONS = "https://aisnagpur.com/aironline/act/section_list";
 
-const ActSection = () => {
+const ActSection = ({ navigation }) => {
     const [actList, setActList] = useState([]);
     const [sectionsData, setSectionsData] = useState({});
     const [sections, setSections] = useState([
@@ -19,46 +20,49 @@ const ActSection = () => {
     const [searchKeyword, setSearchKeyword] = useState("");
     const [selectedValue, setSelectedValue] = useState(null);
     const [loading, setLoading] = useState(false);
+    const [search, setSearch] = useState("");
 
     const fetchActs = async (query) => {
-        console.log("query",query);
+        console.log("query", query);
         if (!query) return;
         setLoading(true);
         try {
-            console.log(`https://aisnagpur.com/aironline/act/act_list?searchString=${query}&limit=100&offset=0`);
-          const response = await fetch(`https://aisnagpur.com/aironline/act/act_list?searchString=${query}&limit=100&offset=0`);
-          const data = await response.json();
-          console.log("response",data);
+            const response = await getActList(100, 0, query)
 
-          setActList(
-            data.map((act) => ({
-              label: act.name, 
-              value: act.id,
-            }))
-          );
+            console.log("act_list", response.actData);
+
+            setActList(
+                response.actData.map((act) => ({
+                    label: act.Act_Name,
+                    value: act.Act_ID,
+                }))
+            );
         } catch (error) {
-          console.error("Error fetching acts:", error);
+            console.error("Error fetching acts:", error);
         } finally {
-          setLoading(false);
+            setLoading(false);
         }
-      };
+    };
+
+    useEffect(() => {
+        if (search.length > 2) {
+            console.log("search".search)
+            fetchActs(search);
+        } else {
+            setActList([]);
+        }
+    }, [search]);
 
 
-    
 
     const fetchSectionsData = async (actName, actID, sectionIndex) => {
         setLoadingSections((prev) => ({ ...prev, [sectionIndex]: true }));
 
         try {
-            const url = `${API_URL_SECTIONS}?actName=${encodeURIComponent(
-                actName
-            )}&actID=${actID}`;
-            console.log("Fetching sections from:", url);
+            const response = await getSectionDetails((actName), actID);
+            const result = response;
 
-            const response = await fetch(url);
-            const result = await response.json();
-
-            console.log("API Response:", result);
+            console.log("Sections Response:", result);
 
             if (result.err_code === "success" && Array.isArray(result.actData)) {
                 const sectionList = result.actData.map((item) => ({
@@ -88,7 +92,7 @@ const ActSection = () => {
         fetchSectionsData(label, value, index);
         setSections((prev) =>
             prev.map((s, i) =>
-                i === index ? { ...s, actID: value, sectionList: [], selectedSections: [] } : s
+                i === index ? { ...s, actID: value, actName: label, sectionList: [], selectedSections: [] } : s
             )
         );
     };
@@ -105,29 +109,45 @@ const ActSection = () => {
         setSections(sections.filter((section) => section.id !== id));
     };
 
+    const onActSelect = (act, section) => {
+
+        if (act.length === 0) {
+            Alert.alert("Validation Error", "Please select an Act.");
+            return;
+        }
+        const selectedSections = sections.flatMap(s =>
+            s.selectedSections.map(sec => `${formattedActName(s.actName)}:${sec}`)
+        );
+
+        if (selectedSections.length === 0) {
+            Alert.alert("Validation Error", "Please select at least one Section.");
+            return;
+        }
+        console.log("Act", act);
+        console.log("Section", selectedSections);
+        // const formattedActName = actName.replace(/[^a-zA-Z]/g, "").toLowerCase();
+
+        navigation.navigate('ActSectionDigestView', {
+            
+                sectionName: selectedSections,
+                flag: 'OR',
+                actName: act
+            
+        })
+
+
+    }
+    const formattedActName = (actName) => {
+        return actName
+            .replace(/[^a-zA-Z0-9]/g, "")
+            .toLowerCase();
+    }
+
     return (
         <ScrollView contentContainerStyle={styles.scrollContainer}>
             <View style={styles.container}>
                 {sections.map((section, index) => (
                     <View key={section.id} style={styles.sectionContainer}>
-                        {/* <View style={styles.inputContainer}>
-              <Text style={styles.label}>Act Name :</Text>
-              {loadingActs ? (
-                <ActivityIndicator size="large" color="#007AFF" />
-              ) : (
-                <Dropdown
-                  style={styles.dropdown}
-                  data={actList}
-                  labelField="label"
-                  valueField="value"
-                  placeholder="Select an Act"
-                  onChange={(item) =>
-                    handleActChange(item.value, item.label, index)
-                  }
-                />
-              )}
-            </View> */}
-
                         <View style={styles.inputContainer}>
                             <Text style={styles.label}>Act Name:</Text>
                             <Dropdown
@@ -143,9 +163,12 @@ const ActSection = () => {
                                     setSelectedValue(item.value);
                                     handleActChange(item.value, item.label, index);
                                 }}
-                                onSearch={fetchActs} // Calls API when user types in search field
+                                onChangeText={(text) => setSearch(text)}
+                                onSearch={fetchActs}
                                 renderLeftIcon={() => (loading ? <ActivityIndicator size="small" color="#007AFF" /> : null)}
                             />
+
+
                         </View>
 
                         <View style={styles.inputContainer}>
@@ -201,7 +224,7 @@ const ActSection = () => {
                     </View>
                 ))}
 
-                <TouchableOpacity style={styles.searchButton}>
+                <TouchableOpacity style={styles.searchButton} onPress={() => onActSelect(sections.map(s => s.actName).filter(Boolean), sections.map(s => s.selectedSections).flat())}>
                     <Text style={styles.searchText}>Search</Text>
                 </TouchableOpacity>
             </View>
@@ -245,10 +268,17 @@ const styles = StyleSheet.create({
         borderColor: "#ccc",
         marginTop: 5,
     },
+    // buttonContainer: {
+    //     flexDirection: "row",
+    //     justifyContent: "space-between",
+    //     alignItems: "center",
+    // },
+
     buttonContainer: {
         flexDirection: "row",
-        justifyContent: "space-between",
+        justifyContent: "flex-end",
         alignItems: "center",
+        gap: 10,
     },
     plusButton: {
         width: 50,
@@ -257,7 +287,7 @@ const styles = StyleSheet.create({
         backgroundColor: "#007AFF",
         justifyContent: "center",
         alignItems: "center",
-        right: -270,
+        // right: -270,
     },
     plusText: {
         fontSize: 30,
@@ -266,6 +296,7 @@ const styles = StyleSheet.create({
     },
     deleteButton: {
         marginLeft: 10,
+
     },
     item: {
         flexDirection: "row",

@@ -73,8 +73,8 @@ export default function NominalSearchDetails({ navigation, route }) {
             citationName: citationName,
         })
     }
-    
-    
+
+
     return (
         <SafeAreaView edges={["bottom", "left", "right"]} style={styles.safearea}>
             <Background>
@@ -86,7 +86,8 @@ export default function NominalSearchDetails({ navigation, route }) {
                     </View>
                     <FlatList
                         data={data}
-                        keyExtractor={(item) => item.citationID}
+                        // keyExtractor={(item) => item.citationID}
+                        keyExtractor={(item, index) => `${item.citationID}-${index}`}
                         renderItem={({ item }) => (
                             <TouchableOpacity onPress={() => nominalListClick(item.citationID, item.citationName)}>
                                 <View style={styles.item}>
@@ -100,7 +101,7 @@ export default function NominalSearchDetails({ navigation, route }) {
                                         </View>
                                         <View style={styles.verticalLine} />
                                         <View style={styles.dodContainer}>
-                                            <Text style={{ fontSize: 8 }}>{item.dod}</Text>
+                                            <Text style={{ fontSize: 7.5 }}>{item.dod}</Text>
                                         </View>
                                     </View>
                                 </View>
@@ -176,18 +177,22 @@ const styles = StyleSheet.create({
     },
     partyNameContainer: {
         flex: 3.5,
-    }, 
+    },
     citationsContainer: {
         flex: 2,
         alignItems: 'center',
         justifyContent: 'center',
         paddingHorizontal: 1,
+        color: theme.colors.red,
+        fontWeight: 600
 
     },
     dodContainer: {
         flex: 1,
         justifyContent: 'center',
         alignItems: 'flex-end',
+        color: theme.colors.blue,
+        fontWeight: 700
     },
 
 });

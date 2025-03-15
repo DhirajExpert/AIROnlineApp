@@ -23,9 +23,12 @@ import { passwordValidator } from "../helpers/passwordValidator";
 import { mlogin } from "../api/api";
 import { nameValidator } from '../helpers/nameValidator';
 import Keychain from "react-native-keychain";
-
-
 import * as SecureStore from 'expo-secure-store';
+import Toast from 'react-native-toast-message';
+
+
+
+
 
 const LoginScreen = ({ navigation }) => {
     const [checked, setChecked] = useState(false);
@@ -35,24 +38,32 @@ const LoginScreen = ({ navigation }) => {
     const [loading, setLoading] = useState(false);
     const logout = useAuthStore((state) => state.logout);
 
-    // useEffect(() => {
-    //     loadCredentials();
-    //   }, []);
-
-
-    const loadCredentials = async () => {
-        try {
-            const savedEmail = await SecureStore.getItemAsync("email");
-            const savedPassword = await SecureStore.getItemAsync("password");
-            const checked = await SecureStore.getItemAsync("rememberMe");
-
-            if (savedEmail && savedPassword && checked === "true") {
-                setEmail(savedEmail);
-                setPassword(savedPassword);
+    useEffect(() => {
+        const loadCredentials = async () => {
+            const credentials = await SecureStore.getItemAsync('user_credentials');
+            if (credentials) {
+                const { username, password } = JSON.parse(credentials);
+                setEmail({ value: username, error: "" });
+                setPassword({ value: password, error: "" });
                 setChecked(true);
             }
-        } catch (error) {
-            console.log("Error loading credentials:", error);
+        };
+        loadCredentials();
+    }, []);
+
+
+    // Save credentials
+    const saveCredentials = async (username, password) => {
+        await SecureStore.setItemAsync('user_credentials', JSON.stringify({ username, password }));
+    };
+
+    // Retrieve credentials 
+    const getCredentials = async () => {
+        const credentials = await SecureStore.getItemAsync('user_credentials');
+        if (credentials) {
+            const { username, password } = JSON.parse(credentials);
+            console.log('User:', username);
+            console.log('Password:', password);
         }
     };
 
@@ -76,17 +87,12 @@ const LoginScreen = ({ navigation }) => {
             return;
         }
 
-        // if (checked) {
-        //     await SecureStore.getItemAsync("email", email.value);
-        //     await SecureStore.getItemAsync("password", password.value);
-        //     await SecureStore.getItemAsync("rememberMe", "true");
-        //   } else {
-        //     await SecureStore.deleteItemAsync("email");
-        //     await SecureStore.deleteItemAsync("password");
-        //     await SecureStore.getItemAsync("rememberMe", "false");
-        //   }
-
-
+        if (checked) {
+            saveCredentials(email.value, password.value);
+        }
+        else{
+            SecureStore.deleteItemAsync('user_credentials');
+        }
 
         try {
             const response = await mlogin(email.value, password.value);
@@ -96,8 +102,41 @@ const LoginScreen = ({ navigation }) => {
                 const mockToken = response.data.jwtToken;
                 await login(mockUserData, mockToken);
                 console.log("Login successful!");
-            } else {
+
+                // navigation.reset({
+                //     index: 0,
+                //     routes: [{ name: "MainDrawer" }],
+                // });
+
+                Toast.show({
+                    type: 'success',
+                    text1: 'Hello : '+response.data.username,
+                    text2: 'Login successful..! 👋',
+                    visibilityTime:2000
+                  });
+
+            } 
+            else if (response.status === 401){
+                logout();
+            }
+            else if (response.status === 404){
+                console.log("login Api", response.data.message);
+                Toast.show({
+                    type: 'success',
+                    text1: 'Login Failed',
+                    text2: response.data.message,
+                    visibilityTime:2000
+                  });
+            }
+            else {
                 console.log("Login failed:", response);
+                Toast.show({
+                    type: 'success',
+                    // text1: 'Hello : '+response.data.username,
+                    text2: response,
+                    visibilityTime:2000
+                  });
+
             }
         } catch (error) {
             console.error("Login API Error:", error);
@@ -187,7 +226,7 @@ const LoginScreen = ({ navigation }) => {
 
                         <TouchableOpacity>
                             <Text style={styles.signupText}>
-                                Don’t have an account? <Text style={styles.signupLink} onPress={() => navigation.replace("RegisterScreen")}>Sign Up</Text>
+                                Don’t have an account? <Text style={styles.signupLink} onPress={() => navigation.navigate("RegisterScreen")}>Sign Up</Text>
                             </Text>
                         </TouchableOpacity>
 

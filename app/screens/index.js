@@ -21,7 +21,7 @@ export { default as BrowseByLawyer } from "./BrowseByLawyer";
 export { default as BrowseByLawyerDetails } from "./BrowseByLawyerDetails";
 export { default as JudgementDate } from "./JudgementDate";
 export { default as BenchStrength } from "./BenchStrength";
-export { default as JudgementDateDetails } from "./BrowseByLawyerDetails";
+export { default as JudgementDateDetails } from "./JudgementDateDetails";
 export { default as BenchStrengthDetails } from "./BenchStrengthDetails";
 export { default as Dashboard } from "./Dashboard";
 export { default as FreeTextSearchDetails } from "./FreeTextSearchDetails";
@@ -51,6 +51,11 @@ export {default as ForgotOTPpassword} from './ForgotOTPpassword';
 export {default as ResetPassword} from './ResetPassword';
 export {default as Statutes} from './Statutes';
 export {default as BareActDetails} from './BareActDetails';
+export {default as SpecificSearch} from './SpecificSearch';
+export {default as PlanPricing} from './PlanPricing';
+export {default as Jump} from './Jump';
+export {default as Bookmark} from './Bookmark';
+export {default as Promocode} from './Promocode';
 
 
 

@@ -13,7 +13,7 @@ import { TextInput } from 'react-native-paper';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import {getJudgementDateDetails} from "../api/api";
 
-export default function JudgementDate({navigation}) {
+export default function JudgementDate({navigation,route}) {
     const [open, setOpen] = useState(false);
     const [value, setValue] = useState("Specific Date");
 
@@ -133,14 +133,15 @@ export default function JudgementDate({navigation}) {
                                 editable={false}
                                 pointerEvents="none"
                                 right={<TextInput.Icon icon={'calendar'}
-                                    onPress={showFromDatepicker} />}
+                                    onPress={showToDatepicker} />}
                             />
                         </TouchableOpacity>
                         {toShow && (
                             <DateTimePicker
                                 value={toDate}
                                 mode="date"
-                                display={Platform.OS === 'ios' ? 'inline' : 'default'}
+                                // display={Platform.OS === 'ios' ? 'inline' : 'default'}
+                                display='spinner'
                                 onChange={onToDateChange}
                             />
                         )}
